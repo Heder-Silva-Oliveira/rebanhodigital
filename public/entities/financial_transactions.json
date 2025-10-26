@@ -1,0 +1,17 @@
+[
+    {
+    "_id": "financial_001",
+    "transactionId": "DES789012B",
+    "type": "despesa",
+    "category": "equipamento",
+    "subcategory": "zootecnico",
+    "amount": 250.50,
+    "description": "Compra de uma pistoda de vacinação",
+    "date": "2025-09-20",
+    "paymentMethod": "dinheiro",
+    "status": "pago",
+    "tags": ["insumo", "equipamento", "despesa"],
+    "notes": "pagamento em dinheiro.",
+    "createdAt": "2025-09-20T14:30:00.000Z"
+  }
+]

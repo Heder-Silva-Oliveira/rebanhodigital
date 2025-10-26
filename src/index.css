@@ -1,0 +1,78 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Configuração do modo dark */
+@layer base {
+  html {
+    @apply transition-colors duration-200;
+  }
+  
+  html.dark {
+    color-scheme: dark;
+  }
+  
+  html:not(.dark) {
+    color-scheme: light;
+  }
+  
+  body {
+    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200;
+  }
+  
+  #root {
+    @apply bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200;
+  }
+}
+
+/* Transições suaves para mudança de tema */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Garantir que elementos específicos tenham o fundo correto */
+.dark body {
+  background-color: rgb(17 24 39) !important;
+  color: rgb(243 244 246) !important;
+}
+
+.dark #root {
+  background-color: rgb(17 24 39) !important;
+}
+
+/* Estilos para cards e containers no modo dark */
+.dark .bg-white {
+  @apply bg-gray-800 !important;
+}
+
+.dark .bg-gray-50 {
+  @apply bg-gray-900 !important;
+}
+
+.dark .text-gray-900 {
+  @apply text-gray-100 !important;
+}
+
+.dark .text-gray-800 {
+  @apply text-gray-200 !important;
+}
+
+.dark .text-gray-700 {
+  @apply text-gray-300 !important;
+}
+
+.dark .text-gray-600 {
+  @apply text-gray-400 !important;
+}
+
+/* Garantir que borders também mudem */
+.dark .border-gray-200 {
+  @apply border-gray-700 !important;
+}
+
+.dark .border-gray-300 {
+  @apply border-gray-600 !important;
+}
