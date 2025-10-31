@@ -41,7 +41,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
     // ✅ EFEITO PARA CARREGAR A IMAGEM DE PERFIL
     useEffect(() => {
         if (isAuthenticated && user?.id) {
-            const imageUrl = `http://localhost:3002/api/users/${user.id}/profile-image?t=${Date.now()}`;
+            const API_URL = import.meta.env.VITE_API_URL || 'https://rebanhodigital.onrender.com';
+            const imageUrl = `${API_URL}/api/users/${user.id}/profile-image?t=${Date.now()}`;
             setProfileImageUrl(imageUrl);
             setImageLoading(true);
             setImageError(false);

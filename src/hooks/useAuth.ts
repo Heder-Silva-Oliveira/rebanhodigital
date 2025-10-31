@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Defina a URL base do seu servidor Express/Backend real
-const EXPRESS_SERVER_URL = 'http://localhost:3002'; 
+const EXPRESS_SERVER_URL = import.meta.env.VITE_API_URL; 
 
 interface User {
     id: string; // Alterado para string para consistência com Mongoose/Frontend
@@ -47,10 +47,10 @@ export function useAuth() {
         setLoading(true);
         
         try {
-            const response = await fetch(`${EXPRESS_SERVER_URL}/api/login`, { 
+            const response = await fetch(`${EXPRESS_SERVER_URL}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: credentials.email, password: credentials.password })
+                body: JSON.stringify(credentials)
             });
 
             if (!response.ok) {
