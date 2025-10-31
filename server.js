@@ -1,9 +1,8 @@
-// server.js
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import jwt from 'jsonwebtoken'; 
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
 
@@ -11,49 +10,56 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3002;
-// server.js (Implementação do Login e JWT)
-// ... (imports de express, mongoose, dotenv, jwt)
 
-// -----------------------------------------------------------------------------
-// IMPORTANTE: DEVE ESTAR NO TOPO COM OUTRAS CONSTANTES GLOBAIS
-// -----------------------------------------------------------------------------
+// ----------------------
+// JWT Secret
+// ----------------------
 const JWT_SECRET = process.env.JWT_SECRET || 'SEGREDO_SUPER_SEGURO_MUDE_ISTO_REAL';
-// Em produção, use bcrypt para comparar senhas, não texto puro!
-// const bcrypt = require('bcryptjs'); 
-// const JWT_SECRET = process.env.JWT_SECRET || 'SUA_CHAVE_SECRETA_MUITO_LONGA';
-// const BCRYPT_ROUNDS = 10;
-// ✅ Verificação de segurança
 if (!JWT_SECRET) {
-    console.error('❌ ERRO: JWT_SECRET não definida no arquivo .env');
-    process.exit(1);
+  console.error('❌ ERRO: JWT_SECRET não definida no arquivo .env');
+  process.exit(1);
 }
+
+// ----------------------
+// Multer
+// ----------------------
 const storage = multer.memoryStorage();
 const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB
-    },
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Apenas imagens são permitidas!'), false);
-        }
-    }
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Apenas imagens são permitidas!'), false);
+  }
 });
+
+// ----------------------
 // Middlewares
+// ----------------------
 app.use(express.json());
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:300'], // Frontend URLs
   credentials: true
 }));
 
+// ----------------------
 // Conexão com MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/db_rebanho_digital';
+// ----------------------
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('❌ ERRO: MONGODB_URI não definida no arquivo .env');
+  process.exit(1);
+}
 
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => console.log('✅ Conectado ao MongoDB!'))
-  .catch(err => console.error('❌ Erro MongoDB:', err));
+  .catch(err => {
+    console.error('❌ Erro MongoDB:', err);
+    process.exit(1); // encerra o app se falhar a conexão
+  });
 
 // =============================================================================
 // SCHEMAS E MODELS
