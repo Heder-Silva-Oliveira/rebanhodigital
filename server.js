@@ -38,9 +38,15 @@ const upload = multer({
 // ----------------------
 app.use(express.json());
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:300'], // Frontend URLs
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://rebanhodigital.vercel.app',
+    'https://rebanhodigital.netlify.app'
+  ],
   credentials: true
 }));
+
 
 // ----------------------
 // Conexão com MongoDB
@@ -224,8 +230,8 @@ app.post('/api/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: user.id, role: user.role }, 
-            JWT_SECRET,
+            { userId: user.id, role: user.role },
+            process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
 
