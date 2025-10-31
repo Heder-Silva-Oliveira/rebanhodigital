@@ -110,12 +110,14 @@ const Pastures: React.FC = () => {
     try {
       const pastureData = {
         ...formData,
-        pastureId: formData.pastureId || `P${Date.now().toString().slice(-6)}`,
         area: Number(formData.area),
         capacity: Number(formData.capacity),
         currentAnimals: Number(formData.currentAnimals),
-        lastRotation: formData.lastRotation ? new Date(formData.lastRotation).toISOString() : '',
-        nextRotation: formData.nextRotation ? new Date(formData.nextRotation).toISOString() : ''
+        lastRotation: formData.lastRotation ? new Date(formData.lastRotation + 'T00:00:00Z').toISOString() : '',
+        nextRotation: formData.nextRotation ? new Date(formData.nextRotation + 'T00:00:00Z').toISOString() : '',
+        soilQuality: formData.soilQuality || 'boa',
+        fencing: formData.fencing || 'boa',
+        notes: formData.notes || ''
       }
       
       if (editingPasture) {
@@ -140,8 +142,8 @@ const Pastures: React.FC = () => {
       currentAnimals: pasture.currentAnimals || 0,
       status: pasture.status,
       grassType: pasture.grassType || '',
-      lastRotation: pasture.lastRotation?.split('T')[0] || '',
-      nextRotation: pasture.nextRotation?.split('T')[0] || '',
+      lastRotation: pasture.lastRotation ? new Date(pasture.lastRotation).toISOString().split('T')[0] : '', 
+      nextRotation: pasture.nextRotation ? new Date(pasture.nextRotation).toISOString().split('T')[0] : '', 
       soilQuality: pasture.soilQuality || 'boa',
       waterSource: pasture.waterSource ?? true,
       fencing: pasture.fencing || 'boa',

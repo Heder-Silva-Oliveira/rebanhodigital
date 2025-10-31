@@ -1,213 +1,249 @@
 import { useState, useEffect, useCallback } from 'react'
 
-// Defina a URL base da API do json-server
-const API_URL = 'http://localhost:3001';
+// Defina a URL base da API do seu backend MongoDB
+const API_URL = 'http://localhost:3002';
 
 interface CRUDOptions {
- entityName: string
- sortBy?: Record<string, 1 | -1>
+  entityName: string
+  sortBy?: Record<string, 1 | -1>
 }
 
-// O tipo T agora deve ter 'id' como chave de identificação, e não '_id'.
-// Omissão de 'id' ao criar um novo item.
+// O tipo T agora deve ter 'id' como chave de identificação
 export function useCRUD<T extends { id?: string } = any>(options: CRUDOptions | string) {
- const entityName = typeof options === 'string' ? options : options.entityName
- const sortBy = typeof options === 'object' ? options.sortBy : undefined
+  const entityName = typeof options === 'string' ? options : options.entityName
+  const sortBy = typeof options === 'object' ? options.sortBy : undefined
 
- const [data, setData] = useState<T[]>([])
- const [loading, setLoading] = useState(true)
- const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState<T[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
- // -----------------------------------------------------------------------
- // 1. Lógica de Carregamento (READ)
- // -----------------------------------------------------------------------
- const loadData = useCallback(async () => {
-   if (!entityName) {
-     setError('Nome da entidade não fornecido')
-     setLoading(false)
-     return
-   }
-   
-   try {
-     setLoading(true);
-     setError(null);
-     
-     const url = `${API_URL}/${entityName}`;
-     let finalData: T[] = [];
+  // -----------------------------------------------------------------------
+  // 1. Lógica de Carregamento (READ)
+  // -----------------------------------------------------------------------
+  const loadData = useCallback(async () => {
+    if (!entityName) {
+      setError('Nome da entidade não fornecido')
+      setLoading(false)
+      return
+    }
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const url = `${API_URL}/api/${entityName}`; // Note: /api/ prefix
+      let finalData: T[] = [];
 
-     try {
-       const response = await fetch(url);
-       if (!response.ok) {
-         throw new Error(`Falha ao buscar dados (Status: ${response.status})`);
-       }
-       finalData = await response.json() as T[];
-     } catch (err) {
-       console.error(`Erro ao buscar dados da API ${url}:`, err);
-       setError(`Falha ao carregar dados de ${entityName}. Verifique o json-server.`);
-       finalData = [];
-     }
+      console.log(`[useCRUD] Carregando dados de: ${url}`);
 
-     // --- 2. APLICAR SORTBY ---
-     if (sortBy && finalData.length > 0) {
-       const sortKey = Object.keys(sortBy)[0]
-       const sortOrder = sortBy[sortKey]
-       finalData = [...finalData].sort((a, b) => {
-         const aVal = a[sortKey as keyof T]
-         const bVal = b[sortKey as keyof T]
-         return sortOrder === 1 ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1)
-       })
-     }
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Falha ao buscar dados (Status: ${response.status})`);
+        }
+        
+        const result = await response.json();
+        console.log(`[useCRUD] Resposta da API:`, result);
+        
+        // --- LÓGICA DE DESEMPACOTAMENTO (CORRIGIDA) ---
+        if (Array.isArray(result)) {
+            // Caso 1: Resposta é um array limpo (JSON Server Style)
+            finalData = result as T[];
+        } else if (result && typeof result === 'object') {
+            // Caso 2: Resposta é um objeto com a chave da entidade (Express/MongoDB Style)
+            
+            // Tenta a chave exata
+            finalData = result[entityName] as T[]; 
+            
+            // Se a chave não funcionar, tenta o singular (e.g., 'animal' para 'animals')
+            if (!Array.isArray(finalData) && result[entityName.slice(0, -1)]) {
+                 finalData = result[entityName.slice(0, -1)] as T[];
+            }
 
-     setData(finalData);
+            if (!Array.isArray(finalData)) {
+                console.warn(`[useCRUD] Formato de resposta inesperado/Não encontrado:`, result);
+                finalData = [];
+            }
+        } else {
+            console.warn(`[useCRUD] Formato de resposta inesperado:`, result);
+            finalData = [];
+        }
+        
+        // Adaptação para diferentes formatos de resposta
+        if (result.animals) {
+          // Se a resposta for { animals: [...] }
+          finalData = result.animals as T[];
+        } else if (Array.isArray(result)) {
+          // Se a resposta for diretamente um array
+          finalData = result as T[];
+        } else {
+          console.warn(`[useCRUD] Formato de resposta inesperado:`, result);
+          finalData = [];
+        }
+        
+      } catch (err) {
+        console.error(`Erro ao buscar dados da API ${url}:`, err);
+        setError(`Falha ao carregar dados de ${entityName}. Verifique se o servidor está rodando.`);
+        finalData = [];
+      }
 
-   } catch (err) {
-     console.error(`Erro inesperado em loadData:`, err)
-     setError(`Erro inesperado ao carregar ${entityName}`)
-   } finally {
-     setLoading(false);
-   }
- }, [entityName, sortBy]);
+      // --- 2. APLICAR SORTBY ---
+      if (sortBy && finalData.length > 0) {
+        const sortKey = Object.keys(sortBy)[0]
+        const sortOrder = sortBy[sortKey]
+        finalData = [...finalData].sort((a, b) => {
+          const aVal = a[sortKey as keyof T]
+          const bVal = b[sortKey as keyof T]
+          return sortOrder === 1 ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1)
+        })
+      }
 
- // -----------------------------------------------------------------------
- // 2. Lógica de Criação (CREATE)
- // -----------------------------------------------------------------------
- // Recebe o item sem ID, o json-server irá criar.
- const createRecord = useCallback(async (item: Omit<T, 'id'>) => {
-   if (!item || typeof item !== 'object') {
-     throw new Error('Dados do item são inválidos')
-   }
+      console.log(`[useCRUD] Dados carregados:`, finalData.length, 'itens');
+      setData(finalData);
 
-   try {
-     setLoading(true);
-     setError(null);
+    } catch (err) {
+      console.error(`Erro inesperado em loadData:`, err)
+      setError(`Erro inesperado ao carregar ${entityName}`)
+    } finally {
+      setLoading(false);
+    }
+  }, [entityName, sortBy]);
 
-     const url = `${API_URL}/${entityName}`;
-     
-     // Prepara os dados, adicionando o timestamp inicial
-     const itemToSend = { ...item, createdAt: new Date().toISOString() };
+  // -----------------------------------------------------------------------
+  // 2. Lógica de Criação (CREATE)
+  // -----------------------------------------------------------------------
+  const createRecord = useCallback(async (item: Omit<T, 'id'>) => {
+    if (!item || typeof item !== 'object') {
+      throw new Error('Dados do item são inválidos')
+    }
 
-     const response = await fetch(url, {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify(itemToSend)
-     });
+    try {
+      setError(null);
 
-     if (!response.ok) {
-       throw new Error(`Falha na criação (Status: ${response.status})`);
-     }
+      const url = `${API_URL}/api/${entityName}`;
+      
+      console.log(`[useCRUD] Criando registro em: ${url}`, item);
 
-     const newItem = await response.json() as T;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
 
-     // Atualiza o estado local
-     setData(prev => [newItem, ...prev]);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Falha na criação (Status: ${response.status}): ${errorText}`);
+      }
 
-     return newItem;
-     
-   } catch (err) {
-     console.error(`Erro ao criar ${entityName}:`, err);
-     setError(`Erro ao criar ${entityName}: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
-     throw err;
-   } finally {
-     setLoading(false);
-   }
- }, [entityName]);
+      const newItem = await response.json() as T;
+      console.log(`[useCRUD] Registro criado:`, newItem);
 
- // -----------------------------------------------------------------------
- // 3. Lógica de Atualização (UPDATE)
- // -----------------------------------------------------------------------
- const updateRecord = useCallback(async (id: string, updates: Partial<T>) => {
-   if (!id || typeof id !== 'string') {
-     throw new Error('ID inválido para atualização')
-   }
+      // Atualiza o estado local
+      setData(prev => [newItem, ...prev]);
 
-   try {
-     setLoading(true);
-     setError(null);
+      return newItem;
+      
+    } catch (err) {
+      console.error(`Erro ao criar ${entityName}:`, err);
+      setError(`Erro ao criar ${entityName}: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
+      throw err;
+    }
+  }, [entityName]);
 
-     // A URL agora usa o 'id' que é o campo primário esperado pelo json-server.
-     const url = `${API_URL}/${entityName}/${id}`;
-     
-     const response = await fetch(url, {
-       method: 'PATCH', // Usamos PATCH para enviar apenas as modificações
-       headers: { 'Content-Type': 'application/json' },
-       // Adiciona o timestamp de atualização ao payload
-       body: JSON.stringify({ ...updates, updatedAt: new Date().toISOString() })
-     });
+  // -----------------------------------------------------------------------
+  // 3. Lógica de Atualização (UPDATE)
+  // -----------------------------------------------------------------------
+  const updateRecord = useCallback(async (id: string, updates: Partial<T>) => {
+    if (!id || typeof id !== 'string') {
+      throw new Error('ID inválido para atualização')
+    }
 
-     if (!response.ok) {
-       throw new Error(`Falha na atualização (Status: ${response.status})`);
-     }
+    try {
+      setError(null);
 
-     const updatedItem = await response.json() as T;
+      const url = `${API_URL}/api/${entityName}/${id}`;
+      
+      console.log(`[useCRUD] Atualizando registro: ${url}`, updates);
 
-     // Atualiza o estado local (em memória) para refletir a mudança
-     // Usa 'id' para comparação no lugar de '_id'
-     setData(prev => prev.map(item => (item as any).id === id ? updatedItem : item));
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
 
-     return updatedItem;
-     
-   } catch (err) {
-     console.error(`Erro ao atualizar ${entityName}:`, err);
-     setError(`Erro ao atualizar ${entityName}: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
-     throw err;
-   } finally {
-     setLoading(false);
-   }
- }, [entityName, data]); // Adicionando 'data' como dependência para que o find de 'currentItem' funcione se necessário
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Falha na atualização (Status: ${response.status}): ${errorText}`);
+      }
 
- // -----------------------------------------------------------------------
- // 4. Lógica de Exclusão (DELETE)
- // -----------------------------------------------------------------------
- const deleteRecord = useCallback(async (id: string) => {
-   if (!id || typeof id !== 'string') {
-     throw new Error('ID inválido para remoção')
-   }
+      const updatedItem = await response.json() as T;
+      console.log(`[useCRUD] Registro atualizado:`, updatedItem);
 
-   try {
-     setLoading(true);
-     setError(null);
+      // Atualiza o estado local
+      setData(prev => prev.map(item => (item as any).id === id ? updatedItem : item));
 
-     const url = `${API_URL}/${entityName}/${id}`;
-     
-     const response = await fetch(url, {
-       method: 'DELETE'
-     });
+      return updatedItem;
+      
+    } catch (err) {
+      console.error(`Erro ao atualizar ${entityName}:`, err);
+      setError(`Erro ao atualizar ${entityName}: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
+      throw err;
+    }
+  }, [entityName]);
 
-     if (!response.ok) {
-       throw new Error(`Falha na exclusão (Status: ${response.status})`);
-     }
+  // -----------------------------------------------------------------------
+  // 4. Lógica de Exclusão (DELETE)
+  // -----------------------------------------------------------------------
+  const deleteRecord = useCallback(async (id: string) => {
+    if (!id || typeof id !== 'string') {
+      throw new Error('ID inválido para remoção')
+    }
 
-     // Atualiza o estado local, removendo o item
-     // Usa 'id' para comparação no lugar de '_id'
-     setData(prev => prev.filter(item => (item as any).id !== id));
-     
-   } catch (err) {
-     console.error(`Erro ao remover ${entityName}:`, err);
-     setError(`Erro ao remover ${entityName}: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
-     throw err;
-   } finally {
-     setLoading(false);
-   }
- }, [entityName]);
+    try {
+      setError(null);
 
+      const url = `${API_URL}/api/${entityName}/${id}`;
+      
+      console.log(`[useCRUD] Deletando registro: ${url}`);
 
- // -----------------------------------------------------------------------
- // 5. Efeito para Carregamento Inicial
- // -----------------------------------------------------------------------
- useEffect(() => {
-   loadData()
- }, [loadData])
+      const response = await fetch(url, {
+        method: 'DELETE'
+      });
 
- // -----------------------------------------------------------------------
- // 6. Retorno do Hook
- // -----------------------------------------------------------------------
- return {
-  data,
-  loading,
-  error,
-  createRecord,
-  updateRecord,
-  deleteRecord,
-  reload: loadData
- }
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Falha na exclusão (Status: ${response.status}): ${errorText}`);
+      }
+
+      console.log(`[useCRUD] Registro ${id} deletado com sucesso`);
+
+      // Atualiza o estado local, removendo o item
+      setData(prev => prev.filter(item => (item as any).id !== id));
+      
+    } catch (err) {
+      console.error(`Erro ao remover ${entityName}:`, err);
+      setError(`Erro ao remover ${entityName}: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
+      throw err;
+    }
+  }, [entityName]);
+
+  // -----------------------------------------------------------------------
+  // 5. Efeito para Carregamento Inicial
+  // -----------------------------------------------------------------------
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  // -----------------------------------------------------------------------
+  // 6. Retorno do Hook
+  // -----------------------------------------------------------------------
+  return {
+    data,
+    loading,
+    error,
+    createRecord,
+    updateRecord,
+    deleteRecord,
+    reload: loadData
+  }
 }

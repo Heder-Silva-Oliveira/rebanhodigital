@@ -1,18 +1,17 @@
 // src/hooks/useAuth.ts
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-// Endereço do json-server
-const API_URL = 'http://localhost:3001'; 
+// Defina a URL base do seu servidor Express/Backend real
+const EXPRESS_SERVER_URL = 'http://localhost:3002'; 
 
 interface User {
- id: number; // Mudar para number, pois json-server usa number por padrão
- email: string;
- name: string;
- role: string;
+    id: string; // Alterado para string para consistência com Mongoose/Frontend
+    email: string;
+    name: string;
+    role: string;
 }
 
-// Interface para os dados que virão no login
 interface Credentials {
     email: string;
     password?: string;
@@ -23,65 +22,98 @@ export function useAuth() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // 1. Efeito para carregar sessão do localStorage (mantemos para persistir o user logado)
+    // 1. Efeito para carregar sessão do localStorage (Mantido para persistência)
     useEffect(() => {
         const savedUser = localStorage.getItem('user');
+        const savedToken = localStorage.getItem('token'); // Verifica se o token também foi salvo
         
-        if (savedUser) {
+        if (savedUser && savedToken) {
             try {
                 const userData: User = JSON.parse(savedUser);
                 setUser(userData);
                 setIsAuthenticated(true);
             } catch (e) {
-                localStorage.removeItem('user'); // Limpa se o JSON estiver corrompido
+                console.error("Erro ao carregar usuário do localStorage, limpando.");
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
             }
         }
         setLoading(false);
     }, []);
 
 
-    // 2. Função de LOGIN (Simula a chamada de API e validação)
+    // 2. Função de LOGIN (Chama o novo endpoint /api/login)
     const signIn = useCallback(async (credentials: Credentials): Promise<User> => {
         setLoading(true);
         
         try {
-            // Usa o json-server para encontrar o usuário com o email e senha
-            // Nota: Em um backend real, NUNCA faríamos o filtro de senha no frontend
-            const response = await fetch(`${API_URL}/users?email=${credentials.email}&password=${credentials.password}`);
-            
+            const response = await fetch(`${EXPRESS_SERVER_URL}/api/login`, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: credentials.email, password: credentials.password })
+            });
+
             if (!response.ok) {
-                throw new Error('Falha na comunicação com o servidor.');
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Credenciais inválidas.');
             }
             
-            const usersFound: User[] = await response.json();
+            const data = await response.json();
+            const userData: User = data.user; 
+            const token = data.token;   
+
+            // Salva o Token e o Usuário no localStorage
+            localStorage.setItem('token', token); 
+            localStorage.setItem('user', JSON.stringify(userData));
             
-            if (usersFound && usersFound.length === 1) {
-                const userData = usersFound[0];
-                
-                // Sucesso: Salva no estado e no storage
-                setUser(userData);
-                setIsAuthenticated(true);
-                localStorage.setItem('user', JSON.stringify(userData));
-                
-                return userData;
-            } else {
-                throw new Error('Email ou senha inválidos.');
-            }
-        } catch (error) {
-            console.error("Erro no login:", error);
+            setUser(userData);
+            setIsAuthenticated(true);
+            
+            return userData; 
+        } catch (error: any) {
+            // Limpa localStorage em caso de falha
+            localStorage.removeItem('user'); 
+            localStorage.removeItem('token');
             setIsAuthenticated(false);
-            throw error; // Propaga o erro para ser tratado pelo componente de Login (se existir)
+            throw error; 
         } finally {
             setLoading(false);
         }
     }, []);
 
+    // 3. Função de CADASTRO (Chama /api/users e faz login automático)
+    const signUp = useCallback(async (credentials: any): Promise<User> => {
+        setLoading(true);
+        try {
+            // 1. CHAMA O CADASTRO (POST /api/users)
+            const response = await fetch(`${EXPRESS_SERVER_URL}/api/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(credentials)
+            });
 
-    // 3. Função de LOGOUT (Limpa a sessão)
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro ao cadastrar usuário.');
+            }
+            
+            // 2. AUTO-LOGIN: Chama signIn imediatamente para obter o token JWT e finalizar a sessão
+            const loggedInUser = await signIn(credentials); 
+            
+            return loggedInUser;
+        } catch (error) {
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }, [signIn]); // Dependência crucial: signIn
+
+    // 4. Função de LOGOUT
     const signOut = useCallback(() => {
         setUser(null);
         setIsAuthenticated(false);
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
         setLoading(false);
     }, []);
 
@@ -90,6 +122,7 @@ export function useAuth() {
         isAuthenticated, 
         loading, 
         signIn, 
+        signUp, // Exportando a nova função
         signOut 
     };
 }

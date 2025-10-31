@@ -30,7 +30,7 @@ export const Home: React.FC = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-white text-[#00875e] text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors flex items-center justify-center">
+                <button className="bg-white text-[#00875e] text-gray px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors flex items-center justify-center">
                   <Play className="mr-2 w-5 h-5" />
                   Demonstração Gratuita
                 </button>
@@ -65,64 +65,64 @@ export const Home: React.FC = () => {
       </section>
 
       {/* Seção de Estatísticas */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-<motion.div
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6, delay: 0.1 }}
-  className="text-center"
->
-  <div className="text-3xl lg:text-4xl font-bold text-[#00875e] text-white mb-2">
-    Zero
-  </div>
-  <div className="text-gray-[#00875e] font-medium">
-    Complexidade
-  </div>
-</motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="text-center"
+              >
+                <div className="text-3xl lg:text-4xl font-bold text-[#00875e] text-[#00875e] mb-2">
+                  Zero
+                </div>
+                <div className="text-gray-[#00875e] font-medium">
+                  Complexidade
+                </div>
+              </motion.div>
 
-<motion.div
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6, delay: 0.2 }}
-  className="text-center"
->
-  <div className="text-3xl lg:text-4xl font-bold text-[#00875e] text-white mb-2">
-    Máxima
-  </div>
-  <div className="text-gray-[#00875e] font-medium">
-    Eficiência
-  </div>
-</motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-center"
+              >
+                <div className="text-3xl lg:text-4xl font-bold text-[#00875e] text-[#00875e] mb-2">
+                  Máxima
+                </div>
+                <div className="text-gray-[#00875e] font-medium">
+                  Eficiência
+                </div>
+              </motion.div>
 
-<motion.div
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6, delay: 0.3 }}
-  className="text-center"
->
-  <div className="text-3xl lg:text-4xl font-bold text-[#00875e] text-white mb-2">
-    Total
-  </div>
-  <div className="text-gray-[#00875e] font-medium">
-    Controle
-  </div>
-</motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="text-center"
+              >
+                <div className="text-3xl lg:text-4xl font-bold text-[#00875e] text-[#00875e] mb-2">
+                  Total
+                </div>
+                <div className="text-gray-[#00875e] font-medium">
+                  Controle
+                </div>
+              </motion.div>
 
-<motion.div
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6, delay: 0.2 }}
-  className="text-center"
->
-  <div className="text-3xl lg:text-4xl font-bold text-[#00875e] text-white mb-2">
-    Gestão
-  </div>
-  <div className="text-gray-[#00875e] font-medium">
-    Inteligente
-  </div>
-</motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-center"
+              >
+                <div className="text-3xl lg:text-4xl font-bold text-[#00875e] text-[#00875e] mb-2">
+                  Gestão
+                </div>
+                <div className="text-gray-[#00875e] font-medium">
+                  Inteligente
+                </div>
+              </motion.div>
           </div>
         </div>
       </section>

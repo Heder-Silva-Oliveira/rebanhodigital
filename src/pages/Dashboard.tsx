@@ -50,25 +50,26 @@ const Dashboard: React.FC = () => {
     // REESCRITA TOTAL DO useMemo 'metrics'
     // =======================================================
     const metrics = useMemo(() => {
-        // ----------------------------------------------------
-        // 1. CÁLCULOS FINANCEIROS BÁSICOS
-        // ----------------------------------------------------
-        const totalReceitas = transactions.filter(t => t.type === 'receita' && t.status === 'pago').reduce((sum, t) => sum + t.amount, 0);
-        const totalDespesas = transactions.filter(t => t.type === 'despesa' && t.status === 'pago').reduce((sum, t) => sum + t.amount, 0);
+        // Cálculos financeiros
+        const totalReceitas = transactions
+            .filter(t => t.type === 'receita' && t.status === 'pago')
+            .reduce((sum: number, t: FinancialTransaction) => sum + (t.amount || 0), 0);
+        
+        const totalDespesas = transactions
+            .filter(t => t.type === 'despesa' && t.status === 'pago')
+            .reduce((sum: number, t: FinancialTransaction) => sum + (t.amount || 0), 0);
+        
         const lucroLiquido = totalReceitas - totalDespesas;
         const margemMedia = totalReceitas > 0 ? ((lucroLiquido / totalReceitas) * 100) : 0;
 
-        // ----------------------------------------------------
-        // 2. CÁLCULOS ZOOTÉCNICOS E DE LOTAÇÃO
-        // ----------------------------------------------------
-        const totalArea = pastures.reduce((sum: any, p: any) => sum + p.area, 0);
+        // Cálculos zootécnicos
+        const totalArea = pastures.reduce((sum: number, p: Pasture) => sum + (p.area || 0), 0);
         const ativos = animals.filter(a => a.status === 'ativo');
-        const totalPesoVivo = ativos.reduce((sum: any, a: any) => sum + a.weight, 0);
+        const totalPesoVivo = ativos.reduce((sum: number, a: Animal) => sum + (a.weight || 0), 0);
         const totalUA = totalPesoVivo / 450;
         const taxaLotacao = totalArea > 0 ? (totalUA / totalArea) : 0;
 
-
-        // Cálculo GMD
+        // Cálculo GMD - CORRIGIDO
         const animalWeighingsMap: Record<string, WeighingRecord[]> = weighings.reduce((acc, record) => {
             if (!acc[record.animalId]) acc[record.animalId] = [];
             acc[record.animalId].push(record);
@@ -78,26 +79,26 @@ const Dashboard: React.FC = () => {
         let totalGmd = 0;
         let animalCountWithGmd = 0;
 
-
         animals.forEach((animal: Animal) => {
-            const rawHistory = animalWeighingsMap[animal.animalId];
+            const rawHistory = animalWeighingsMap[animal.animalId]; // animalId existe agora
             const history = rawHistory 
-                ? [...rawHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                : null;
+            ? [...rawHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+            : null;
 
             if (history && history.length >= 2) {
-                const firstEntry = history[0];
-                const lastEntry = history[history.length - 1];
-                
-                const diffWeight = lastEntry.weight - firstEntry.weight;
-                const diffDays = (new Date(lastEntry.date).getTime() - new Date(firstEntry.date).getTime()) / (1000 * 3600 * 24);
+            const firstEntry = history[0];
+            const lastEntry = history[history.length - 1];
+            
+            const diffWeight = lastEntry.weight - firstEntry.weight;
+            const diffDays = (new Date(lastEntry.date).getTime() - new Date(firstEntry.date).getTime()) / (1000 * 3600 * 24);
 
-                if (diffDays > 0) {
-                    totalGmd += diffWeight / diffDays;
-                    animalCountWithGmd++;
-                }
+            if (diffDays > 0) {
+                totalGmd += diffWeight / diffDays;
+                animalCountWithGmd++;
+            }
             }
         });
+
         const gmdMedio = animalCountWithGmd > 0 ? totalGmd / animalCountWithGmd : 0;
 
         // --- CÁLCULO MORTALIDADE ---

@@ -21,7 +21,9 @@ import Planning from './pages/Planning'
 import Notifications from './pages/Notifications'
 import CompanyHealth from './pages/CompanyHealth'
 import Estimativa from './pages/Estimativa'
+import SignUpPage from './pages/SignUpPage'
 import {Loader2} from 'lucide-react'
+
 // Componente de rota protegida
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth()
@@ -91,6 +93,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/cadastro" element={<SignUpPage />} />
             
             {/* Se o usuário tentar acessar uma rota pública e JÁ estiver logado, redireciona para o Dashboard */}
             <Route path="/dashboard" element={<Navigate to="/dashboard" replace />} />
