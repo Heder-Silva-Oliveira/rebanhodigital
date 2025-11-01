@@ -5,7 +5,8 @@ import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
-import bodyParser from 'body-parser';
+
+// ❌ REMOVEMOS: import bodyParser from 'body-parser';
 
 dotenv.config();
 
@@ -29,27 +30,34 @@ const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) cb(null, true);
-    else cb(new Error('Apenas imagens são permitidas!'), false);
+     if (file.mimetype.startsWith('image/')) cb(null, true);
+     else cb(new Error('Apenas imagens são permitidas!'), false);
   }
 });
 
 // ----------------------
-// Middlewares
+// Middlewares (A ORDEM CORRETA)
 // ----------------------
-app.use(cors({
- origin: [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://rebanhodigital.vercel.app',
-  'https://rebanhodigital.netlify.app'
- ],
- credentials: true
-}));
 
-// Os 'parsers' (json, urlencoded) vêm DEPOIS
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// ✅ 1. CORS VEM PRIMEIRO, COMPLETO
+app.use(cors({
+  origin: [
+     'http://localhost:5173',
+     'http://localhost:3000',
+     'https://rebanhodigital.vercel.app',
+     'https://rebanhodigital.netlify.app'
+  ],
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+app.options('*', cors()); // Trata requisições 'pre-flight'
+
+// ✅ 2. OS PARSERS VÊM DEPOIS
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 // ----------------------
 // Conexão com MongoDB
 // ----------------------
@@ -65,8 +73,8 @@ mongoose.connect(MONGODB_URI, {
 })
   .then(() => console.log('✅ Conectado ao MongoDB!'))
   .catch(err => {
-    console.error('❌ Erro MongoDB:', err);
-    process.exit(1); // encerra o app se falhar a conexão
+     console.error('❌ Erro MongoDB:', err);
+     process.exit(1);
   });
 
 // =============================================================================
