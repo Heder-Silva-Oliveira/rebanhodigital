@@ -518,7 +518,7 @@ app.get('/api/users', async (req, res) => {
 
 app.post('/api/users', async (req, res) => {
   try {
-
+    console.log('📥 Dados recebidos para novo usuário:', req.body);
     // ✅ VERIFICAÇÃO DE DEFESA
     if (!req.body || !req.body.password) {
       console.error('❌ Erro: req.body ou req.body.password está faltando.', req.body);

@@ -24,7 +24,6 @@ const SignUpModal: React.FC<SignUpModalProps> = ({ onClose, onSuccess }) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
-
         if (!email || !password || !name) {
         setError('Nome, email e senha são obrigatórios.');
         setLoading(false);

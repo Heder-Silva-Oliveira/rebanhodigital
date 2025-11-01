@@ -26,7 +26,7 @@ export function useAuth() {
     useEffect(() => {
         const savedUser = localStorage.getItem('user');
         const savedToken = localStorage.getItem('token'); // Verifica se o token também foi salvo
-        
+
         if (savedUser && savedToken) {
             try {
                 const userData: User = JSON.parse(savedUser);
@@ -86,6 +86,7 @@ export function useAuth() {
         setLoading(true);
         try {
             // 1. CHAMA O CADASTRO (POST /api/users)
+            console.log("➡️ Enviando dados para cadastro:", credentials); // Linha de depuração
             const response = await fetch(`${EXPRESS_SERVER_URL}/api/users`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
