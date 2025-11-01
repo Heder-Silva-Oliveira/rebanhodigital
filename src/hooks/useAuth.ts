@@ -93,9 +93,15 @@ export function useAuth() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Erro ao cadastrar usuário.');
-            }
+            const errorData = await response.json();
+
+            // ✅ LINHA NOVA: Para vermos o erro do Render no console
+            console.error("❌ ERRO DO SERVIDOR (RENDER):", errorData); 
+
+            // Tenta usar a mensagem 'details' que o backend envia
+            throw new Error(errorData.details || errorData.message || 'Erro ao cadastrar usuário.');
+        }
+            
             
             // 2. AUTO-LOGIN: Chama signIn imediatamente para obter o token JWT e finalizar a sessão
             const loggedInUser = await signIn(credentials); 

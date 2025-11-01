@@ -516,24 +516,37 @@ app.get('/api/users', async (req, res) => {
 
 app.post('/api/users', async (req, res) => {
   try {
-      // 1. ✅ Criptografa a senha antes de salvar
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+    // ✅ VERIFICAÇÃO DE DEFESA
+    if (!req.body || !req.body.password) {
+      console.error('❌ Erro: req.body ou req.body.password está faltando.', req.body);
+      throw new Error("Dados de cadastro incompletos. 'password' é obrigatório.");
+    }
+    
+    // 1. Criptografa a senha antes de salvar
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
     const userData = {
-    ...req.body,
-    password: hashedPassword, // 2. ✅ Salva o hash, não a senha pura
-    id: req.body.id || `user_${Date.now()}`
+      ...req.body,
+      password: hashedPassword, // 2. Salva o hash, não a senha pura
+      id: req.body.id || `user_${Date.now()}`
     };
     
     const user = await User.create(userData);
-    res.status(201).json(user); // Não retorne a senha no JSON
+    
+    // ✅ Resposta (não inclua a senha)
+    res.status(201).json({
+        id: user.id,
+        email: user.email,
+        name: user.name
+    });
 
   } catch (error) {
-    console.error('❌ Erro ao criar usuário:', error);
+    console.error('❌ Erro ao criar usuário:', error.message);
     res.status(400).json({ error: 'Erro ao criar usuário', details: error.message });
   }
-  });
+});
 
 // =============================================================================
 // ROTAS TRANSAÇÕES FINANCEIRAS
