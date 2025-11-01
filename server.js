@@ -36,18 +36,20 @@ const upload = multer({
 // ----------------------
 // Middlewares
 // ----------------------
-app.use(express.json());
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://rebanhodigital.vercel.app',
-    'https://rebanhodigital.netlify.app'
-  ],
-  credentials: true
+ origin: [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://rebanhodigital.vercel.app',
+  'https://rebanhodigital.netlify.app'
+ ],
+ credentials: true
 }));
 
-
+// Os 'parsers' (json, urlencoded) vêm DEPOIS
+app.use(express.json());
+// Também é uma boa ideia adicionar este:
+app.use(express.urlencoded({ extended: true }));
 // ----------------------
 // Conexão com MongoDB
 // ----------------------
