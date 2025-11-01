@@ -21,6 +21,11 @@ const SignUpModal: React.FC<SignUpModalProps> = ({ onClose, onSuccess }) => {
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
+        console.log('---- DEBUG DO FORMULÁRIO ----');
+        console.log('Estado do Nome:', name);
+        console.log('Estado do Email:', email);
+        console.log('Estado da Senha:', password); // <--- ESTA É A LINHA MAIS IMPORTANTE
+        console.log('-----------------------------');
         e.preventDefault();
         setError(null);
         setLoading(true);

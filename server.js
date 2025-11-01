@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
+import bodyParser from 'body-parser';
 
 dotenv.config();
 
@@ -47,9 +48,8 @@ app.use(cors({
 }));
 
 // Os 'parsers' (json, urlencoded) vêm DEPOIS
-app.use(express.json());
-// Também é uma boa ideia adicionar este:
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 // ----------------------
 // Conexão com MongoDB
 // ----------------------
@@ -523,7 +523,7 @@ app.post('/api/users', async (req, res) => {
     if (!req.body || !req.body.password) {
       // Dentro do 'if (!req.body || !req.body.password)'
 
-      const receivedBody = JSON.stringify(req.body);
+        const receivedBody = JSON.stringify(req.body);
       throw new Error(`Password é obrigatório. O servidor recebeu: ${receivedBody}`);
     }
     
