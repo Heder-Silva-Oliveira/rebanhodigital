@@ -219,23 +219,28 @@ app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
+        // 1. Encontra o usuário
         const user = await User.findOne({ email: email });
 
         if (!user) {
-            return res.status(401).json({ message: 'Credenciais inválidas.' });
-        }
-
-        if (user.password !== password) {
             return res.status(401).json({ message: 'Email ou senha inválidos.' });
         }
 
+        // 2. ✅ Compara a senha enviada com o hash salvo no banco
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordMatch) {
+            return res.status(401).json({ message: 'Email ou senha inválidos.' });
+        }
+
+        // 3. Se as senhas batem, cria o token
         const token = jwt.sign(
             { userId: user.id, role: user.role },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET, // Agora vai funcionar!
             { expiresIn: '1h' }
         );
 
-        // ✅ RESPOSTA ATUALIZADA (mas compatível)
+        // 4. Envia a resposta
         res.status(200).json({
             token: token,
             user: {
@@ -243,10 +248,8 @@ app.post('/api/login', async (req, res) => {
                 email: user.email,
                 name: user.name,
                 role: user.role,
-                // ✅ Novos campos opcionais
                 hasProfileImage: !!user.profileImage?.data,
                 phone: user.phone,
-                // ❌ NÃO incluir dados sensíveis ou muito grandes
             }
         });
 
@@ -513,18 +516,24 @@ app.get('/api/users', async (req, res) => {
 
 app.post('/api/users', async (req, res) => {
   try {
+      // 1. ✅ Criptografa a senha antes de salvar
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
     const userData = {
-      ...req.body,
-      id: req.body.id || `user_${Date.now()}`
+    ...req.body,
+    password: hashedPassword, // 2. ✅ Salva o hash, não a senha pura
+    id: req.body.id || `user_${Date.now()}`
     };
     
     const user = await User.create(userData);
-    res.status(201).json(user);
+    res.status(201).json(user); // Não retorne a senha no JSON
+
   } catch (error) {
     console.error('❌ Erro ao criar usuário:', error);
     res.status(400).json({ error: 'Erro ao criar usuário', details: error.message });
   }
-});
+  });
 
 // =============================================================================
 // ROTAS TRANSAÇÕES FINANCEIRAS
