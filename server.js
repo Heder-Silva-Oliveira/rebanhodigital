@@ -516,39 +516,30 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+// ✅ SUBSTITUA SUA ROTA 'POST /api/users' POR ESTA:
 app.post('/api/users', async (req, res) => {
-  try {
-    console.log('📥 Dados recebidos para novo usuário:', req.body);
-    // ✅ VERIFICAÇÃO DE DEFESA
-    if (!req.body || !req.body.password) {
-      // Dentro do 'if (!req.body || !req.body.password)'
+  console.log('--- ROTA DE TESTE /api/users FOI ATINGIDA ---');
+  console.log('HEADERS RECEBIDOS:', JSON.stringify(req.headers));
+  console.log('BODY RECEBIDO:', req.body); // Este é o log que você não vê no Render
 
-        const receivedBody = JSON.stringify(req.body);
-      throw new Error(`Password é obrigatório. O servidor recebeu: ${receivedBody}`);
-    }
-    
-    // 1. Criptografa a senha antes de salvar
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
-    const userData = {
-      ...req.body,
-      password: hashedPassword, // 2. Salva o hash, não a senha pura
-      id: req.body.id || `user_${Date.now()}`
-    };
-    
-    const user = await User.create(userData);
-    
-    // ✅ Resposta (não inclua a senha)
-    res.status(201).json({
-        id: user.id,
-        email: user.email,
-        name: user.name
+  if (!req.body) {
+    // Se o body-parser falhou, req.body será undefined
+    res.status(400).json({ 
+      error: 'TESTE FALHOU: req.body é UNDEFINED.', 
+      headers: req.headers // Envia os headers de volta para debug
     });
-
-  } catch (error) {
-    console.error('❌ Erro ao criar usuário:', error.message);
-    res.status(400).json({ error: 'Erro ao criar usuário', details: error.message });
+  } else if (!req.body.password) {
+     // Se o body-parser funcionou, mas a senha está vazia
+     res.status(400).json({ 
+       error: 'TESTE OK, MAS SENHA VAZIA. Body recebido:', 
+       data: req.body 
+     });
+  } else {
+    // Se o body-parser funcionou E a senha veio
+    res.status(200).json({
+      message: 'TESTE BEM-SUCEDIDO! O SERVIDOR RECEBEU:',
+      data_received: req.body
+    });
   }
 });
 
