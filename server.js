@@ -521,8 +521,10 @@ app.post('/api/users', async (req, res) => {
     console.log('📥 Dados recebidos para novo usuário:', req.body);
     // ✅ VERIFICAÇÃO DE DEFESA
     if (!req.body || !req.body.password) {
-      console.error('❌ Erro: req.body ou req.body.password está faltando.', req.body);
-      throw new Error("Dados de cadastro incompletos. 'password' é obrigatório.");
+      // Dentro do 'if (!req.body || !req.body.password)'
+
+      const receivedBody = JSON.stringify(req.body);
+      throw new Error(`Password é obrigatório. O servidor recebeu: ${receivedBody}`);
     }
     
     // 1. Criptografa a senha antes de salvar
