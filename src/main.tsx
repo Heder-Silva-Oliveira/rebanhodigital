@@ -1,9 +1,16 @@
 
 import { createRoot } from 'react-dom/client'
+import React from 'react';
 import App from './App.tsx'
 import './index.css'
+import { AuthProvider } from './hooks/useAuth';
 
 createRoot(document.getElementById('root')!).render(
-  <App />,
+  <React.StrictMode>
+    {/* 2. Envolva o <App /> com o <AuthProvider /> */}
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </React.StrictMode>,
 )
 

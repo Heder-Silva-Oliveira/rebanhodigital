@@ -22,6 +22,8 @@ import Notifications from './pages/Notifications'
 import CompanyHealth from './pages/CompanyHealth'
 import Estimativa from './pages/Estimativa'
 import SignUpPage from './pages/SignUpPage'
+import ProfilePage from './pages/Profile'
+
 import {Loader2} from 'lucide-react'
 
 // Componente de rota protegida
@@ -31,12 +33,14 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+        {/* ⚠️ CORREÇÃO 3: Use o Loader2 que você importou */}
+        <Loader2 className="animate-spin h-12 w-12 text-green-600" />
       </div>
     )
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/" replace />
+  // ⚠️ CORREÇÃO 4: Redireciona para /login, não para /
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 
 function App() {
@@ -75,8 +79,8 @@ function App() {
                     <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                     <Route path="/company-health" element={<ProtectedRoute><CompanyHealth /></ProtectedRoute>} />
                     <Route path="/estimativa" element={<ProtectedRoute><Estimativa /></ProtectedRoute>} />
-                    
-                    {/* REDIRECIONAMENTO DE SEGURANÇA: Se logado, tudo vai para o Dashboard */}
+                    <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                    {/* REDIRECIONAMENTO DE SEGURANÇA: Se logado, tudo vai para o Dashboard ProfilePage */}
                     <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
             </main>

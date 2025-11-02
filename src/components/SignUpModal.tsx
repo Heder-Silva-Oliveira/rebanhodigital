@@ -21,26 +21,23 @@ const SignUpModal: React.FC<SignUpModalProps> = ({ onClose, onSuccess }) => {
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
-        console.log('---- DEBUG DO FORMULÁRIO ----');
-        console.log('Estado do Nome:', name);
-        console.log('Estado do Email:', email);
-        console.log('Estado da Senha:', password); // <--- ESTA É A LINHA MAIS IMPORTANTE
-        console.log('-----------------------------');
         e.preventDefault();
         setError(null);
         setLoading(true);
-        if (!email || !password || !name) {
-        setError('Nome, email e senha são obrigatórios.');
-        setLoading(false);
-        return;
-        }
+        console.log(`📝 Tentativa de cadastro para email: ${email}, nome: ${name}`);
+    if (!email || !password || !name) {
+        console.log('❌ Falha no cadastro: Campos obrigatórios faltando.');
+      setError('Nome, email e senha são obrigatórios.');
+      setLoading(false);
+      return;
+    }
 
-        // ✅ ADICIONE ESTA VALIDAÇÃO
-        if (password.length < 8) {
-        setError('A senha deve ter pelo menos 8 caracteres.');
-        setLoading(false);
-        return;
-        }
+    // ✅ ADICIONE ESTA VALIDAÇÃO
+    if (password.length < 8) {
+      setError('A senha deve ter pelo menos 8 caracteres.');
+      setLoading(false);
+      return;
+    }
 
         try {
             // Chama a função signUp que irá para o endpoint POST /api/users no backend

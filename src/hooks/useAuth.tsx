@@ -1,15 +1,23 @@
-// src/hooks/useAuth.ts
+import React, { 
+    useState, 
+    useEffect, 
+    useCallback, 
+    createContext, 
+    useContext, 
+    ReactNode 
+} from 'react';
 
-import { useState, useEffect, useCallback } from 'react';
-
-// Defina a URL base do seu servidor Express/Backend real
+// A URL do seu backend
 const EXPRESS_SERVER_URL = import.meta.env.VITE_API_URL; 
 
+// --- 1. DEFINIÇÃO DOS TIPOS ---
 interface User {
-    id: string; // Alterado para string para consistência com Mongoose/Frontend
+    id: string;
     email: string;
     name: string;
     role: string;
+    // Adicione o tenantId que o backend envia
+    tenantId: string; 
 }
 
 interface Credentials {
@@ -17,23 +25,41 @@ interface Credentials {
     password?: string;
 }
 
-export function useAuth() {
+// O que o nosso contexto vai fornecer
+interface AuthContextType {
+    user: User | null;
+    isAuthenticated: boolean;
+    loading: boolean;
+    signIn: (credentials: Credentials) => Promise<User>;
+    signUp: (credentials: any) => Promise<User>;
+    signOut: () => void;
+}
+
+// --- 2. CRIAÇÃO DO CONTEXTO ---
+// Este é o "molde" vazio
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// --- 3. CRIAÇÃO DO PROVEDOR (O "CÉREBRO") ---
+// Este componente vai envolver seu App e conter toda a lógica
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    
+    // --- Toda a sua lógica do useAuth() vem para cá ---
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true); // Começa true
 
-    // 1. Efeito para carregar sessão do localStorage (Mantido para persistência)
+    // 1. Efeito para carregar sessão do localStorage
     useEffect(() => {
         const savedUser = localStorage.getItem('user');
-        const savedToken = localStorage.getItem('token'); // Verifica se o token também foi salvo
-
+        const savedToken = localStorage.getItem('token');
+        
         if (savedUser && savedToken) {
             try {
                 const userData: User = JSON.parse(savedUser);
                 setUser(userData);
                 setIsAuthenticated(true);
             } catch (e) {
-                console.error("Erro ao carregar usuário do localStorage, limpando.");
+                console.error("Erro ao carregar usuário, limpando.");
                 localStorage.removeItem('user');
                 localStorage.removeItem('token');
             }
@@ -41,11 +67,9 @@ export function useAuth() {
         setLoading(false);
     }, []);
 
-
-    // 2. Função de LOGIN (Chama o novo endpoint /api/login)
+    // 2. Função de LOGIN
     const signIn = useCallback(async (credentials: Credentials): Promise<User> => {
         setLoading(true);
-        
         try {
             const response = await fetch(`${EXPRESS_SERVER_URL}/api/login`, {
                 method: 'POST',
@@ -62,7 +86,6 @@ export function useAuth() {
             const userData: User = data.user; 
             const token = data.token;   
 
-            // Salva o Token e o Usuário no localStorage
             localStorage.setItem('token', token); 
             localStorage.setItem('user', JSON.stringify(userData));
             
@@ -71,7 +94,6 @@ export function useAuth() {
             
             return userData; 
         } catch (error: any) {
-            // Limpa localStorage em caso de falha
             localStorage.removeItem('user'); 
             localStorage.removeItem('token');
             setIsAuthenticated(false);
@@ -81,12 +103,10 @@ export function useAuth() {
         }
     }, []);
 
-    // 3. Função de CADASTRO (Chama /api/users e faz login automático)
+    // 3. Função de CADASTRO
     const signUp = useCallback(async (credentials: any): Promise<User> => {
         setLoading(true);
         try {
-            // 1. CHAMA O CADASTRO (POST /api/users)
-            console.log("➡️ Enviando dados para cadastro:", credentials); // Linha de depuração
             const response = await fetch(`${EXPRESS_SERVER_URL}/api/users`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -94,26 +114,19 @@ export function useAuth() {
             });
 
             if (!response.ok) {
-            const errorData = await response.json();
-
-            // ✅ LINHA NOVA: Para vermos o erro do Render no console
-            console.error("❌ ERRO DO SERVIDOR (RENDER):", errorData); 
-
-            // Tenta usar a mensagem 'details' que o backend envia
-            throw new Error(errorData.details || errorData.message || 'Erro ao cadastrar usuário.');
-        }
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro ao cadastrar usuário.');
+            }
             
-            
-            // 2. AUTO-LOGIN: Chama signIn imediatamente para obter o token JWT e finalizar a sessão
+            // Auto-login
             const loggedInUser = await signIn(credentials); 
-            
             return loggedInUser;
         } catch (error) {
             throw error;
         } finally {
             setLoading(false);
         }
-    }, [signIn]); // Dependência crucial: signIn
+    }, [signIn]); // Dependência de signIn
 
     // 4. Função de LOGOUT
     const signOut = useCallback(() => {
@@ -122,14 +135,32 @@ export function useAuth() {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         setLoading(false);
+        // O App.tsx vai re-renderizar e mostrar as PublicRoutes
     }, []);
 
-    return { 
-        user, 
-        isAuthenticated, 
-        loading, 
-        signIn, 
-        signUp, // Exportando a nova função
-        signOut 
-    };
-}
+    // --- Fim da sua lógica ---
+
+    // O Provedor retorna o Contexto com os valores
+    return (
+        <AuthContext.Provider value={{ 
+            user, 
+            isAuthenticated, 
+            loading, 
+            signIn, 
+            signUp, 
+            signOut 
+        }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
+
+// --- 4. CRIAÇÃO DO HOOK (O "CONSUMIDOR") ---
+// Este é o hook que seus componentes vão usar
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+    }
+    return context;
+};

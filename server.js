@@ -6,8 +6,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
 
-// ❌ REMOVEMOS: import bodyParser from 'body-parser';
-
 dotenv.config();
 
 const app = express();
@@ -30,33 +28,26 @@ const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
-     if (file.mimetype.startsWith('image/')) cb(null, true);
-     else cb(new Error('Apenas imagens são permitidas!'), false);
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Apenas imagens são permitidas!'), false);
   }
 });
 
 // ----------------------
-// Middlewares (A ORDEM CORRETA)
+// Middlewares
 // ----------------------
-
-// ✅ 1. CORS VEM PRIMEIRO, COMPLETO
 app.use(cors({
   origin: [
-     'http://localhost:5173',
-     'http://localhost:3000',
-     'https://rebanhodigital.vercel.app',
-     'https://rebanhodigital.netlify.app'
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://rebanhodigital.vercel.app',
+    'https://rebanhodigital.netlify.app'
   ],
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
-app.options('*', cors()); // Trata requisições 'pre-flight'
 
-// ✅ 2. OS PARSERS VÊM DEPOIS
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 // ----------------------
 // Conexão com MongoDB
@@ -73,8 +64,8 @@ mongoose.connect(MONGODB_URI, {
 })
   .then(() => console.log('✅ Conectado ao MongoDB!'))
   .catch(err => {
-     console.error('❌ Erro MongoDB:', err);
-     process.exit(1);
+    console.error('❌ Erro MongoDB:', err);
+    process.exit(1);
   });
 
 // =============================================================================
@@ -83,6 +74,8 @@ mongoose.connect(MONGODB_URI, {
 
 // Schema Animal
 const AnimalSchema = new mongoose.Schema({
+  // NOVO: tenantId é a chave para o isolamento de dados
+  tenantId: { type: String, required: true, index: true }, 
   id: String,
   animalId: String,
   name: String,
@@ -105,41 +98,44 @@ const AnimalSchema = new mongoose.Schema({
 
 // Schema Usuário
 const UserSchema = new mongoose.Schema({
-    id: String,
-    email: String,
-    password: String,
+  // NOVO: tenantId para vincular o usuário a uma "organização"
+  tenantId: { type: String, required: true, index: true }, 
+  id: String,
+  email: String,
+  password: String,
+  name: String,
+  role: String, // 'adm', 'operador'
+  
+  profileImage: {
+    data: Buffer,
+    contentType: String,
+    size: Number,
+    uploadedAt: { type: Date, default: Date.now }
+  },
+  phone: String,
+  cpf: String,
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    zipCode: String
+  },
+  farm: {
     name: String,
-    role: String,
-    
-    profileImage: {
-        data: Buffer,
-        contentType: String,
-        size: Number,
-        uploadedAt: { type: Date, default: Date.now }
-    },
-    phone: String,
-    cpf: String,
-    address: {
-        street: String,
-        city: String,
-        state: String,
-        zipCode: String
-    },
-    farm: {
-        name: String,
-        size: Number,
-        location: String
-    },
-    isActive: { type: Boolean, default: true },
-    lastLogin: Date,
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    size: Number,
+    location: String
+  },
+  isActive: { type: Boolean, default: true },
+  lastLogin: Date,
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 }, { 
-
-    timestamps: false // Se você já não usa timestamps do mongoose
+  timestamps: false
 });
+
 // Schema Transação Financeira
 const FinancialSchema = new mongoose.Schema({
+  tenantId: { type: String, required: true, index: true }, // NOVO
   id: String,
   transactionId: String,
   type: String,
@@ -160,6 +156,7 @@ const FinancialSchema = new mongoose.Schema({
 
 // Schema Pastagem
 const PastureSchema = new mongoose.Schema({
+  tenantId: { type: String, required: true, index: true }, // NOVO
   id: String,
   pastureId: String,
   name: String,
@@ -180,6 +177,7 @@ const PastureSchema = new mongoose.Schema({
 
 // Schema Planejamento
 const PlanningSchema = new mongoose.Schema({
+  tenantId: { type: String, required: true, index: true }, // NOVO
   id: String,
   planId: String,
   title: String,
@@ -202,6 +200,7 @@ const PlanningSchema = new mongoose.Schema({
 
 // Schema Registro de Pesagem
 const WeighingRecordSchema = new mongoose.Schema({
+  tenantId: { type: String, required: true, index: true }, // NOVO
   id: String,
   animalId: String,
   weight: Number,
@@ -222,35 +221,83 @@ const Planning = mongoose.model('Planning', PlanningSchema);
 const WeighingRecord = mongoose.model('WeighingRecord', WeighingRecordSchema);
 
 // =============================================================================
-// ROTAS DA API
+// 🔒 NOVO: MIDDLEWARES DE AUTENTICAÇÃO E AUTORIZAÇÃO
+// =============================================================================
+
+/**
+ * Middleware para autenticar o token JWT.
+ * Verifica o token no header 'Authorization', valida-o e anexa
+ * o payload (user) ao objeto 'req'.
+ */
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (token == null) {
+        return res.status(401).json({ message: 'Token não fornecido.' });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, userPayload) => {
+        if (err) {
+            return res.status(403).json({ message: 'Token inválido ou expirado.' });
+        }
+        
+        // Anexa o payload decodificado (contém userId, role, tenantId)
+        req.user = userPayload; 
+        next();
+    });
+};
+
+/**
+ * Middleware "fábrica" para verificar a role (função) do usuário.
+ * Use-o nas rotas que precisam de permissão específica (ex: 'adm').
+ * @param {Array<String>} allowedRoles - Um array de roles permitidas (ex: ['adm', 'gerente'])
+ */
+const checkRole = (allowedRoles) => {
+    return (req, res, next) => {
+        // Este middleware DEVE rodar DEPOIS de authenticateToken
+        if (!req.user || !req.user.role) {
+            return res.status(401).json({ message: 'Usuário não autenticado.' });
+        }
+
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Acesso negado. Você não tem permissão.' });
+        }
+        
+        next();
+    };
+};
+
+
+// =============================================================================
+// ROTAS DE AUTENTICAÇÃO (PÚBLICAS)
 // =============================================================================
 
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
-
+    console.log(`🔐 Tentativa de login para email: ${email}`);
     try {
-        // 1. Encontra o usuário
         const user = await User.findOne({ email: email });
-
         if (!user) {
             return res.status(401).json({ message: 'Email ou senha inválidos.' });
         }
 
-        // 2. ✅ Compara a senha enviada com o hash salvo no banco
         const isPasswordMatch = await bcrypt.compare(password, user.password);
-
         if (!isPasswordMatch) {
             return res.status(401).json({ message: 'Email ou senha inválidos.' });
         }
 
-        // 3. Se as senhas batem, cria o token
+        // ALTERADO: Adicionado 'tenantId' ao payload do JWT
         const token = jwt.sign(
-            { userId: user.id, role: user.role },
-            process.env.JWT_SECRET, // Agora vai funcionar!
+            { 
+                userId: user.id, 
+                role: user.role, 
+                tenantId: user.tenantId // Essencial para o isolamento de dados
+            },
+            JWT_SECRET,
             { expiresIn: '1h' }
         );
 
-        // 4. Envia a resposta
         res.status(200).json({
             token: token,
             user: {
@@ -258,6 +305,7 @@ app.post('/api/login', async (req, res) => {
                 email: user.email,
                 name: user.name,
                 role: user.role,
+                tenantId: user.tenantId, // NOVO
                 hasProfileImage: !!user.profileImage?.data,
                 phone: user.phone,
             }
@@ -270,20 +318,108 @@ app.post('/api/login', async (req, res) => {
 });
 
 // =============================================================================
-// NOVAS ROTAS (NÃO INTERFEREM COM O LOGIN EXISTENTE)
+// ROTAS USUÁRIOS (PROTEGIDAS)
 // =============================================================================
 
-// ✅ Rota para upload de foto de perfil
-app.patch('/api/users/:id/profile-image', upload.single('profileImage'), async (req, res) => {
+// Rota para criar usuário (Registro) - Esta é semi-pública
+app.post('/api/users', async (req, res) => {
+    try {
+        console.log('📥 Dados recebidos para novo usuário:', req.body);
+        if (!req.body || !req.body.password) {
+            throw new Error(`Password é obrigatório.`);
+        }
+        
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+        // ALTERADO: Define o tenantId no registro
+        const newId = req.body.id || `user_${Date.now()}`;
+        const userData = {
+            ...req.body,
+            password: hashedPassword,
+            id: newId,
+            // NOVO: Define o tenantId inicial.
+            // Aqui, estamos assumindo que o usuário é o "dono" da sua própria conta/tenant.
+            tenantId: newId 
+        };
+        
+        const user = await User.create(userData);
+        
+        res.status(201).json({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            tenantId: user.tenantId // NOVO
+        });
+
+    } catch (error) {
+        console.error('❌ Erro ao criar usuário:', error.message);
+        res.status(400).json({ error: 'Erro ao criar usuário', details: error.message });
+    }
+});
+
+// Proteger rotas de usuário:
+// Um usuário só deve poder alterar seus próprios dados.
+
+// NOVO: Protegido com authenticateToken
+app.patch('/api/users/:id/change-password', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { currentPassword, newPassword } = req.body;
+
+  // NOVO: Verificação de segurança
+  // O ID no token (req.user.userId) deve ser o mesmo do parâmetro da rota
+  if (req.user.userId !== id) {
+    return res.status(403).json({ message: 'Acesso negado. Você só pode alterar sua própria senha.' });
+  }
+
+  try {
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+    }
+
+    // ALTERADO: Busca pelo ID do token, que é mais seguro
+    const user = await User.findOne({ id: req.user.userId });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({ message: 'A senha atual está incorreta.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    user.updatedAt = new Date();
+    await user.save();
+
+    res.status(200).json({ message: 'Senha alterada com sucesso!' });
+
+  } catch (error) {
+    console.error('❌ Erro ao alterar senha:', error.message);
+    res.status(500).json({ message: 'Erro interno do servidor.', details: error.message });
+  }
+});
+
+// NOVO: Protegido com authenticateToken
+app.patch('/api/users/:id/profile-image', authenticateToken, upload.single('profileImage'), async (req, res) => {
     try {
         const { id } = req.params;
+
+        // NOVO: Verificação de segurança
+        if (req.user.userId !== id) {
+            return res.status(403).json({ message: 'Acesso negado.' });
+        }
         
         if (!req.file) {
             return res.status(400).json({ error: 'Nenhuma imagem enviada' });
         }
 
+        // ALTERADO: Busca pelo ID do token
         const user = await User.findOneAndUpdate(
-            { id: id },
+            { id: req.user.userId },
             { 
                 profileImage: {
                     data: req.file.buffer,
@@ -301,12 +437,7 @@ app.patch('/api/users/:id/profile-image', upload.single('profileImage'), async (
 
         res.json({
             message: 'Foto de perfil atualizada com sucesso!',
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                hasProfileImage: !!user.profileImage.data
-            }
+            user: { /* ... dados do usuário ... */ }
         });
 
     } catch (error) {
@@ -315,15 +446,18 @@ app.patch('/api/users/:id/profile-image', upload.single('profileImage'), async (
     }
 });
 
-// ✅ Rota para servir a imagem
-app.get('/api/users/:id/profile-image', async (req, res) => {
+// Rota para servir a imagem (pode ser pública ou protegida, dependendo da regra)
+// Vamos mantê-la protegida para que só usuários logados vejam fotos de outros (se permitido)
+// ou que um usuário só possa ver a sua.
+app.get('/api/users/:id/profile-image', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         
-        const user = await User.findOne({ id: id });
+        // ALTERADO: Adiciona filtro de tenantId
+        // Regra de negócio: Você só pode ver fotos de usuários do seu tenant.
+        const user = await User.findOne({ id: id, tenantId: req.user.tenantId });
         
         if (!user || !user.profileImage || !user.profileImage.data) {
-            // Retorna imagem padrão se não tiver foto
             return res.redirect('/default-avatar.png');
         }
 
@@ -341,17 +475,23 @@ app.get('/api/users/:id/profile-image', async (req, res) => {
     }
 });
 
-// ✅ Rota para atualizar dados do usuário (campos novos)
-app.patch('/api/users/:id', async (req, res) => {
+// NOVO: Protegido com authenticateToken
+app.patch('/api/users/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
+
+        // NOVO: Verificação de segurança
+        if (req.user.userId !== id) {
+            return res.status(403).json({ message: 'Acesso negado.' });
+        }
+        
         const updateData = {
             ...req.body,
             updatedAt: new Date()
         };
 
         const user = await User.findOneAndUpdate(
-            { id: id },
+            { id: req.user.userId }, // ALTERADO: Busca pelo ID do token
             updateData,
             { new: true }
         );
@@ -362,14 +502,7 @@ app.patch('/api/users/:id', async (req, res) => {
 
         res.json({
             message: 'Usuário atualizado com sucesso!',
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                address: user.address,
-                farm: user.farm
-            }
+            user: { /* ... dados do usuário ... */ }
         });
 
     } catch (error) {
@@ -378,30 +511,31 @@ app.patch('/api/users/:id', async (req, res) => {
     }
 });
 
-// ✅ Rota para buscar usuário completo (com novos campos)
-app.get('/api/users/:id/full', async (req, res) => {
+// NOVO: Protegido com authenticateToken
+app.get('/api/users/:id/full', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
-        const user = await User.findOne({ id: id });
+
+        // NOVO: Verificação de segurança
+        if (req.user.userId !== id) {
+            return res.status(403).json({ message: 'Acesso negado.' });
+        }
+
+        // ALTERADO: Busca pelo ID do token
+        const user = await User.findOne({ id: req.user.userId });
 
         if (!user) {
             return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
-        // ✅ Retorna todos os campos, mas exclui a senha e dados binários da imagem
+        // Exclui a senha
         const userResponse = {
             id: user.id,
             email: user.email,
             name: user.name,
             role: user.role,
-            phone: user.phone,
-            cpf: user.cpf,
-            address: user.address,
-            farm: user.farm,
-            isActive: user.isActive,
-            lastLogin: user.lastLogin,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
+            tenantId: user.tenantId,
+            // ... resto dos campos
             hasProfileImage: !!user.profileImage?.data
         };
 
@@ -413,23 +547,25 @@ app.get('/api/users/:id/full', async (req, res) => {
     }
 });
 
-// Rota de saúde
+// Rota de saúde (pública)
 app.get('/', (req, res) => {
   res.json({ 
     message: '🚀 Servidor AgroGest funcionando!',
-    timestamp: new Date().toISOString(),
-    entities: ['animals', 'users', 'financial_transactions', 'pastures', 'planning', 'weighing_records']
+    timestamp: new Date().toISOString()
   });
 });
 
 // =============================================================================
-// ROTAS ANIMAIS
+// ROTAS ANIMAIS (PROTEGIDAS)
 // =============================================================================
 
-// GET - Buscar todos os animais
-app.get('/api/animals', async (req, res) => {
+// GET - Buscar todos os animais (DO SEU TENANT)
+// NOVO: Protegido com authenticateToken
+app.get('/api/animals', authenticateToken, async (req, res) => {
   try {
-    const animals = await Animal.find().sort({ created_at: -1 });
+    // ALTERADO: Adicionado filtro 'tenantId: req.user.tenantId'
+    console.log('🕵️‍♂️ [DEBUG] Payload do Token Recebido:', req.user);
+    const animals = await Animal.find({ tenantId: req.user.tenantId }).sort({ created_at: -1 });
     res.json({ animals });
   } catch (error) {
     console.error('❌ Erro ao buscar animais:', error);
@@ -437,10 +573,12 @@ app.get('/api/animals', async (req, res) => {
   }
 });
 
-// GET - Buscar animal por ID
-app.get('/api/animals/:id', async (req, res) => {
+// GET - Buscar animal por ID (DO SEU TENANT)
+// NOVO: Protegido com authenticateToken
+app.get('/api/animals/:id', authenticateToken, async (req, res) => {
   try {
-    const animal = await Animal.findOne({ id: req.params.id });
+    // ALTERADO: Adicionado filtro de tenantId na busca
+    const animal = await Animal.findOne({ id: req.params.id, tenantId: req.user.tenantId });
     if (!animal) {
       return res.status(404).json({ error: 'Animal não encontrado' });
     }
@@ -451,13 +589,15 @@ app.get('/api/animals/:id', async (req, res) => {
   }
 });
 
-// POST - Criar animal
-app.post('/api/animals', async (req, res) => {
+// POST - Criar animal (NO SEU TENANT)
+// NOVO: Protegido com authenticateToken
+app.post('/api/animals', authenticateToken, async (req, res) => {
   try {
     console.log('📥 Dados recebidos:', req.body);
     
     const animalData = {
       ...req.body,
+      tenantId: req.user.tenantId, // NOVO: Injeta o tenantId do token
       id: req.body.id || `animals_${Date.now()}`,
       animalId: req.body.animalId || `A${String(Date.now()).slice(-6)}`,
       updatedAt: new Date()
@@ -472,11 +612,13 @@ app.post('/api/animals', async (req, res) => {
   }
 });
 
-// PATCH - Atualizar animal
-app.patch('/api/animals/:id', async (req, res) => {
+// PATCH - Atualizar animal (DO SEU TENANT)
+// NOVO: Protegido com authenticateToken
+app.patch('/api/animals/:id', authenticateToken, async (req, res) => {
   try {
+    // ALTERADO: Adicionado filtro de tenantId
     const animal = await Animal.findOneAndUpdate(
-      { id: req.params.id },
+      { id: req.params.id, tenantId: req.user.tenantId },
       { ...req.body, updatedAt: new Date() },
       { new: true, runValidators: true }
     );
@@ -493,10 +635,12 @@ app.patch('/api/animals/:id', async (req, res) => {
   }
 });
 
-// DELETE - Deletar animal
-app.delete('/api/animals/:id', async (req, res) => {
+// DELETE - Deletar animal (DO SEU TENANT e SÓ ADMIN)
+// NOVO: Protegido com authenticateToken E checkRole
+app.delete('/api/animals/:id', authenticateToken, checkRole(['adm']), async (req, res) => {
   try {
-    const animal = await Animal.findOneAndDelete({ id: req.params.id });
+    // ALTERADO: Adicionado filtro de tenantId
+    const animal = await Animal.findOneAndDelete({ id: req.params.id, tenantId: req.user.tenantId });
     
     if (!animal) {
       return res.status(404).json({ error: 'Animal não encontrado' });
@@ -511,72 +655,53 @@ app.delete('/api/animals/:id', async (req, res) => {
 });
 
 // =============================================================================
-// ROTAS USUÁRIOS
+// ROTAS USUÁRIOS (ADMIN - LISTAGEM)
 // =============================================================================
 
-app.get('/api/users', async (req, res) => {
+// Lista usuários (SÓ ADMIN, e SÓ DO SEU TENANT)
+// NOVO: Protegido com authenticateToken E checkRole
+app.get('/api/users', authenticateToken, checkRole(['adm']), async (req, res) => {
   try {
-    const users = await User.find();
-    res.json({ users });
+    // ALTERADO: Filtra usuários pelo tenantId do admin logado
+    const users = await User.find({ tenantId: req.user.tenantId });
+    // Remove senhas da resposta
+    const safeUsers = users.map(u => ({
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        role: u.role,
+        tenantId: u.tenantId
+    }));
+    res.json({ users: safeUsers });
   } catch (error) {
     console.error('❌ Erro ao buscar usuários:', error);
     res.status(500).json({ error: 'Erro ao buscar usuários' });
   }
 });
 
-// ✅ SUBSTITUA SUA ROTA 'POST /api/users' POR ESTA:
-app.post('/api/users', async (req, res) => {
-  console.log('--- ROTA DE TESTE /api/users FOI ATINGIDA ---');
-  console.log('HEADERS RECEBIDOS:', JSON.stringify(req.headers));
-  console.log('BODY RECEBIDO:', req.body); // Este é o log que você não vê no Render
-
-  if (!req.body) {
-    // Se o body-parser falhou, req.body será undefined
-    res.status(400).json({ 
-      error: 'TESTE FALHOU: req.body é UNDEFINED.', 
-      headers: req.headers // Envia os headers de volta para debug
-    });
-  } else if (!req.body.password) {
-     // Se o body-parser funcionou, mas a senha está vazia
-     res.status(400).json({ 
-       error: 'TESTE OK, MAS SENHA VAZIA. Body recebido:', 
-       data: req.body 
-     });
-  } else {
-    // Se o body-parser funcionou E a senha veio
-    res.status(200).json({
-      message: 'TESTE BEM-SUCEDIDO! O SERVIDOR RECEBEU:',
-      data_received: req.body
-    });
-  }
-});
 
 // =============================================================================
-// ROTAS TRANSAÇÕES FINANCEIRAS
+// ROTAS TRANSAÇÕES FINANCEIRAS (PROTEGIDAS)
 // =============================================================================
 
-app.get('/api/financial_transactions', async (req, res) => {
+app.get('/api/financial_transactions', authenticateToken, async (req, res) => {
  try {
-  const transactions = await Financial.find().sort({ date: -1 });
-  
-  // ✅ CORREÇÃO: Retornar o array 'transactions' diretamente, sem o envelope { }
+  // ALTERADO: Filtro por tenantId
+  const transactions = await Financial.find({ tenantId: req.user.tenantId }).sort({ date: -1 }); 
   res.json(transactions); 
-  
  } catch (error) {
   console.error('❌ Erro ao buscar transações:', error);
   res.status(500).json({ error: 'Erro ao buscar transações financeiras' });
  }
 });
 
-app.post('/api/financial_transactions', async (req, res) => {
+app.post('/api/financial_transactions', authenticateToken, async (req, res) => {
  try {
   const transactionData = {
    ...req.body,
+   tenantId: req.user.tenantId // NOVO
   };
-  
-  // O Mongoose (com timestamps habilitados) se encarrega de criar o _id, createdAt e updatedAt
   const transaction = await Financial.create(transactionData);
-  
   res.status(201).json(transaction);
  } catch (error) {
   console.error('❌ Erro ao criar transação:', error);
@@ -585,64 +710,56 @@ app.post('/api/financial_transactions', async (req, res) => {
 });
 
 // =============================================================================
-// ROTAS PASTAGENS
+// ROTAS PASTAGENS (PROTEGIDAS)
 // =============================================================================
 
-app.get('/api/pastures', async (req, res) => {
+app.get('/api/pastures', authenticateToken, async (req, res) => {
   try {
-    const pastures = await Pasture.find();
-    
-    // ✅ CORREÇÃO: Enviar APENAS o array 'pastures' (formato esperado pelo useCRUD)
+    // ALTERADO: Filtro por tenantId
+    const pastures = await Pasture.find({ tenantId: req.user.tenantId });
     res.json(pastures); 
-    
   } catch (error) {
     console.error('❌ Erro ao buscar pastagens:', error);
     res.status(500).json({ error: 'Erro ao buscar pastagens' });
   }
 });
 
-app.post('/api/pastures', async (req, res) => {
+app.post('/api/pastures', authenticateToken, async (req, res) => {
   try {
     const pastureData = {
       ...req.body,
+      tenantId: req.user.tenantId // NOVO
     };
-    
     const pasture = await Pasture.create(pastureData);
-    
-    // O retorno deve ser o objeto criado com o status 201
     res.status(201).json(pasture); 
-  } catch (error) {
+  } catch (error)
+ {
     console.error('❌ Erro ao criar pastagem:', error);
-    // Retorna a mensagem de erro detalhada do Mongoose
     res.status(400).json({ error: 'Erro ao criar pastagem', details: error.message }); 
   }
 });
 
 // =============================================================================
-// ROTAS PLANEJAMENTO
+// ROTAS PLANEJAMENTO (PROTEGIDAS)
 // =============================================================================
 
-app.get('/api/planning', async (req, res) => {
+app.get('/api/planning', authenticateToken, async (req, res) => {
  try {
-  const planning = await Planning.find().sort({ startDate: -1 });
-  
-  // ✅ CORREÇÃO: Retornar o array diretamente (sem o envelope { planning })
+  // ALTERADO: Filtro por tenantId
+  const planning = await Planning.find({ tenantId: req.user.tenantId }).sort({ startDate: -1 });
   res.json(planning); 
-  
  } catch (error) {
   console.error('❌ Erro ao buscar planejamentos:', error);
   res.status(500).json({ error: 'Erro ao buscar planejamentos' });
  }
 });
 
-app.post('/api/planning', async (req, res) => {
+app.post('/api/planning', authenticateToken, async (req, res) => {
  try {
   const planningData = {
    ...req.body,
-
+   tenantId: req.user.tenantId // NOVO
   };
-  
-  // O Mongoose irá gerar o _id e os timestamps (se configurado com { timestamps: true })
   const plan = await Planning.create(planningData);
   res.status(201).json(plan);
  } catch (error) {
@@ -652,18 +769,14 @@ app.post('/api/planning', async (req, res) => {
 });
 
 // =============================================================================
-// ROTAS REGISTROS DE PESAGEM
+// ROTAS REGISTROS DE PESAGEM (PROTEGIDAS)
 // =============================================================================
 
-// Servidor Express/Node.js
-
-app.get('/api/weighing_records', async (req, res) => {
+app.get('/api/weighing_records', authenticateToken, async (req, res) => {
  try {
-  const records = await WeighingRecord.find().sort({ date: -1 });
-  
-  // CORREÇÃO: Retornar o array diretamente, sem o envelope { }
+  // ALTERADO: Filtro por tenantId
+  const records = await WeighingRecord.find({ tenantId: req.user.tenantId }).sort({ date: -1 });
   res.json(records); 
-  
  } catch (error) {
   console.error('❌ Erro ao buscar registros de pesagem:', error);
   res.status(500).json({ error: 'Erro ao buscar registros de pesagem' });
@@ -671,14 +784,14 @@ app.get('/api/weighing_records', async (req, res) => {
 });
 
 
-app.post('/api/weighing_records', async (req, res) => {
+app.post('/api/weighing_records', authenticateToken, async (req, res) => {
   try {
     const recordData = {
       ...req.body,
+      tenantId: req.user.tenantId, // NOVO
       id: req.body.id || `weigh_${Date.now()}`,
       created_at: new Date()
     };
-    
     const record = await WeighingRecord.create(recordData);
     res.status(201).json(record);
   } catch (error) {
@@ -693,7 +806,6 @@ app.post('/api/weighing_records', async (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🐄 Servidor AgroGest rodando em: http://localhost:${PORT}`);
-  console.log(`📊 Entidades disponíveis: animais, usuários, transações, pastagens, planejamento, pesagem`);
 }).on('error', (err) => {
   console.error('❌ Erro ao iniciar servidor:', err.message);
 });

@@ -1,27 +1,73 @@
-// server.js
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import multer from 'multer';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
+// ----------------------
+// JWT Secret
+// ----------------------
+const JWT_SECRET = process.env.JWT_SECRET || 'SEGREDO_SUPER_SEGURO_MUDE_ISTO_REAL';
+if (!JWT_SECRET) {
+  console.error('❌ ERRO: JWT_SECRET não definida no arquivo .env');
+  process.exit(1);
+}
+
+// ----------------------
+// Multer
+// ----------------------
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Apenas imagens são permitidas!'), false);
+  }
+});
+
+// ----------------------
 // Middlewares
-app.use(express.json());
+// ----------------------
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:300'], // Frontend URLs
-  credentials: true
+ origin: [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://rebanhodigital.vercel.app',
+  'https://rebanhodigital.netlify.app'
+ ],
+ credentials: true
 }));
 
+// Os 'parsers' (json, urlencoded) vêm DEPOIS
+app.use(express.json());
+// Também é uma boa ideia adicionar este:
+app.use(express.urlencoded({ extended: true }));
+// ----------------------
 // Conexão com MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/db_rebanho_digital';
+// ----------------------
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('❌ ERRO: MONGODB_URI não definida no arquivo .env');
+  process.exit(1);
+}
 
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => console.log('✅ Conectado ao MongoDB!'))
-  .catch(err => console.error('❌ Erro MongoDB:', err));
+  .catch(err => {
+    console.error('❌ Erro MongoDB:', err);
+    process.exit(1); // encerra o app se falhar a conexão
+  });
 
 // =============================================================================
 // SCHEMAS E MODELS
@@ -51,13 +97,39 @@ const AnimalSchema = new mongoose.Schema({
 
 // Schema Usuário
 const UserSchema = new mongoose.Schema({
-  id: String,
-  email: String,
-  password: String,
-  name: String,
-  role: String
-});
+    id: String,
+    email: String,
+    password: String,
+    name: String,
+    role: String,
+    
+    profileImage: {
+        data: Buffer,
+        contentType: String,
+        size: Number,
+        uploadedAt: { type: Date, default: Date.now }
+    },
+    phone: String,
+    cpf: String,
+    address: {
+        street: String,
+        city: String,
+        state: String,
+        zipCode: String
+    },
+    farm: {
+        name: String,
+        size: Number,
+        location: String
+    },
+    isActive: { type: Boolean, default: true },
+    lastLogin: Date,
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+}, { 
 
+    timestamps: false // Se você já não usa timestamps do mongoose
+});
 // Schema Transação Financeira
 const FinancialSchema = new mongoose.Schema({
   id: String,
@@ -144,50 +216,33 @@ const WeighingRecord = mongoose.model('WeighingRecord', WeighingRecordSchema);
 // =============================================================================
 // ROTAS DA API
 // =============================================================================
-// server.js (Implementação do Login e JWT)
-// ... (imports de express, mongoose, dotenv, jwt)
-
-// -----------------------------------------------------------------------------
-// IMPORTANTE: DEVE ESTAR NO TOPO COM OUTRAS CONSTANTES GLOBAIS
-// -----------------------------------------------------------------------------
-const JWT_SECRET = process.env.JWT_SECRET || 'SEGREDO_SUPER_SEGURO_MUDE_ISTO_REAL';
-// Em produção, use bcrypt para comparar senhas, não texto puro!
-// const bcrypt = require('bcryptjs'); 
-// const JWT_SECRET = process.env.JWT_SECRET || 'SUA_CHAVE_SECRETA_MUITO_LONGA';
-// const BCRYPT_ROUNDS = 10;
-
 
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
-
+    console.log(`🔐 Tentativa de login para email: ${email,password}`);
     try {
-        // 1. Buscar usuário no MongoDB pelo email
+        // 1. Encontra o usuário
         const user = await User.findOne({ email: email });
 
         if (!user) {
-            return res.status(401).json({ message: 'Credenciais inválidas.' });
+            return res.status(401).json({ message: 'Email ou senha inválidos.' });
         }
 
-        // 2. VERIFICAÇÃO DE SENHA (USAR BCrypt em Produção)
-        // Se você está testando localmente sem criptografia, use a comparação direta (Como no seu AuthModal antigo):
-        if (user.password !== password) {
-             return res.status(401).json({ message: 'Email ou senha inválidos.' });
+        // 2. ✅ Compara a senha enviada com o hash salvo no banco
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordMatch) {
+            return res.status(401).json({ message: 'Email ou senha inválidos.' });
         }
-        
-        // Se você já criptografou, usaria:
-        // const isMatch = await bcrypt.compare(password, user.password);
-        // if (!isMatch) { return res.status(401).json({ message: 'Email ou senha inválidos.' }); }
 
-
-        // 3. GERAÇÃO DO JWT
+        // 3. Se as senhas batem, cria o token
         const token = jwt.sign(
-            // Payload: Dados mínimos e não sensíveis do usuário
-            { userId: user.id, role: user.role }, 
-            JWT_SECRET,
-            { expiresIn: '1h' } // Token expira em 1 hora
+            { userId: user.id, role: user.role },
+            process.env.JWT_SECRET, // Agora vai funcionar!
+            { expiresIn: '1h' }
         );
 
-        // 4. RESPOSTA DE SUCESSO
+        // 4. Envia a resposta
         res.status(200).json({
             token: token,
             user: {
@@ -195,6 +250,8 @@ app.post('/api/login', async (req, res) => {
                 email: user.email,
                 name: user.name,
                 role: user.role,
+                hasProfileImage: !!user.profileImage?.data,
+                phone: user.phone,
             }
         });
 
@@ -203,6 +260,186 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ message: 'Erro interno do servidor.' });
     }
 });
+
+// =============================================================================
+app.patch('/api/users/:id/change-password', async (req, res) => {
+  const { id } = req.params;
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    // 1. Validação básica
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+    }
+
+    // 2. Encontra o usuário
+    const user = await User.findOne({ id: id });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+
+    // 3. Verifica se a senha atual está correta
+    const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({ message: 'A senha atual está incorreta.' });
+    }
+
+    // 4. Criptografa a nova senha
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // 5. Salva a nova senha no banco
+    user.password = hashedPassword;
+    user.updatedAt = new Date();
+    await user.save();
+
+    res.status(200).json({ message: 'Senha alterada com sucesso!' });
+
+  } catch (error) {
+    console.error('❌ Erro ao alterar senha:', error.message);
+    res.status(500).json({ message: 'Erro interno do servidor.', details: error.message });
+  }
+});
+// ✅ Rota para upload de foto de perfil
+app.patch('/api/users/:id/profile-image', upload.single('profileImage'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhuma imagem enviada' });
+        }
+
+        const user = await User.findOneAndUpdate(
+            { id: id },
+            { 
+                profileImage: {
+                    data: req.file.buffer,
+                    contentType: req.file.mimetype,
+                    size: req.file.size,
+                    uploadedAt: new Date()
+                }
+            },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        res.json({
+            message: 'Foto de perfil atualizada com sucesso!',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                hasProfileImage: !!user.profileImage.data
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Erro ao atualizar foto:', error);
+        res.status(500).json({ error: 'Erro ao atualizar foto' });
+    }
+});
+
+// ✅ Rota para servir a imagem
+app.get('/api/users/:id/profile-image', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const user = await User.findOne({ id: id });
+        
+        if (!user || !user.profileImage || !user.profileImage.data) {
+            // Retorna imagem padrão se não tiver foto
+            return res.redirect('/default-avatar.png');
+        }
+
+        res.set({
+            'Content-Type': user.profileImage.contentType,
+            'Content-Length': user.profileImage.size,
+            'Cache-Control': 'public, max-age=86400'
+        });
+
+        res.send(user.profileImage.data);
+
+    } catch (error) {
+        console.error('❌ Erro ao buscar imagem:', error);
+        res.status(500).json({ error: 'Erro ao buscar imagem' });
+    }
+});
+
+// ✅ Rota para atualizar dados do usuário (campos novos)
+app.patch('/api/users/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = {
+            ...req.body,
+            updatedAt: new Date()
+        };
+
+        const user = await User.findOneAndUpdate(
+            { id: id },
+            updateData,
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        res.json({
+            message: 'Usuário atualizado com sucesso!',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                address: user.address,
+                farm: user.farm
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Erro ao atualizar usuário:', error);
+        res.status(500).json({ error: 'Erro ao atualizar usuário' });
+    }
+});
+
+// ✅ Rota para buscar usuário completo (com novos campos)
+app.get('/api/users/:id/full', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findOne({ id: id });
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        // ✅ Retorna todos os campos, mas exclui a senha e dados binários da imagem
+        const userResponse = {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            phone: user.phone,
+            cpf: user.cpf,
+            address: user.address,
+            farm: user.farm,
+            isActive: user.isActive,
+            lastLogin: user.lastLogin,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            hasProfileImage: !!user.profileImage?.data
+        };
+
+        res.json(userResponse);
+
+    } catch (error) {
+        console.error('❌ Erro ao buscar usuário:', error);
+        res.status(500).json({ error: 'Erro ao buscar usuário' });
+    }
+});
+
 // Rota de saúde
 app.get('/', (req, res) => {
   res.json({ 
@@ -316,15 +553,36 @@ app.get('/api/users', async (req, res) => {
 
 app.post('/api/users', async (req, res) => {
   try {
+    console.log('📥 Dados recebidos para novo usuário:', req.body);
+    // ✅ VERIFICAÇÃO DE DEFESA
+    if (!req.body || !req.body.password) {
+      // Dentro do 'if (!req.body || !req.body.password)'
+
+        const receivedBody = JSON.stringify(req.body);
+      throw new Error(`Password é obrigatório. O servidor recebeu: ${receivedBody}`);
+    }
+    
+    // 1. Criptografa a senha antes de salvar
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
     const userData = {
       ...req.body,
+      password: hashedPassword, // 2. Salva o hash, não a senha pura
       id: req.body.id || `user_${Date.now()}`
     };
     
     const user = await User.create(userData);
-    res.status(201).json(user);
+    
+    // ✅ Resposta (não inclua a senha)
+    res.status(201).json({
+        id: user.id,
+        email: user.email,
+        name: user.name
+    });
+
   } catch (error) {
-    console.error('❌ Erro ao criar usuário:', error);
+    console.error('❌ Erro ao criar usuário:', error.message);
     res.status(400).json({ error: 'Erro ao criar usuário', details: error.message });
   }
 });

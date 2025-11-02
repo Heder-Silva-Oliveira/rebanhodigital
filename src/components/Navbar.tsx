@@ -31,32 +31,91 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
     const [imageLoading, setImageLoading] = useState(true);
     const [imageError, setImageError] = useState(false);
     
-
-    // ✅ CORREÇÃO: Apenas UMA função handleSignUp
+    // Função para o SignUp (mantida)
     const handleSignUpSuccess = (userData: any) => {
         setShowSignUpModal(false);
+        // O useAuth (signUp) já deve ter feito o login,
+        // então o App.tsx vai redirecionar automaticamente.
+        // Mas podemos forçar aqui se necessário.
         window.location.href = '/dashboard';
     };
 
-    // ✅ EFEITO PARA CARREGAR A IMAGEM DE PERFIL
+    // ✅ EFEITO PARA CARREGAR A IMAGEM DE PERFIL (CORRIGIDO)
     useEffect(() => {
-        if (isAuthenticated && user?.id) {
-            const API_URL = import.meta.env.VITE_API_URL || 'https://rebanhodigital.onrender.com';
-            const imageUrl = `${API_URL}/api/users/${user.id}/profile-image?t=${Date.now()}`;
-            setProfileImageUrl(imageUrl);
-            setImageLoading(true);
-            setImageError(false);
-        } else {
-            setProfileImageUrl(null);
-            setImageLoading(false);
-            setImageError(false);
-        }
-    }, [isAuthenticated, user]);
+        // Helper para pegar os headers (igual ao do useCRUD.ts)
+        const getAuthHeaders = () => {
+            const token = localStorage.getItem('token');
+            const headers = new Headers();
+            if (token) {
+                headers.append('Authorization', `Bearer ${token}`);
+            }
+            return headers;
+        };
 
-    const handleLogin = (userData: any) => {
-        setShowAuthModal(false);
-        window.location.href = '/dashboard'
-    };
+        // Função para buscar a imagem
+        const fetchProfileImage = async () => {
+            if (isAuthenticated && user?.id) {
+                setImageLoading(true);
+                setImageError(false);
+                setProfileImageUrl(null); // Limpa a imagem antiga
+
+                const API_URL = import.meta.env.VITE_API_URL || 'https://rebanhodigital.onrender.com';
+                const imageUrl = `${API_URL}/api/users/${user.id}/profile-image`;
+
+                try {
+                    const response = await fetch(imageUrl, {
+                        headers: getAuthHeaders()
+                    });
+
+                    if (!response.ok) {
+                        // Se for 404 (sem imagem), apenas marca o erro, não desloga.
+                        if (response.status === 404) {
+                           console.warn("Usuário não tem foto de perfil cadastrada.");
+                        }
+                        throw new Error('Falha ao carregar imagem de perfil');
+                    }
+
+                    const imageBlob = await response.blob();
+                    
+                    // Verifica se o blob é de uma imagem (pode retornar JSON de erro)
+                    if (imageBlob.type.startsWith('image/')) {
+                      const localUrl = URL.createObjectURL(imageBlob);
+                      setProfileImageUrl(localUrl);
+                    } else {
+                      throw new Error('Resposta do servidor não era uma imagem.');
+                    }
+
+                } catch (error) {
+                    console.error("Erro ao carregar imagem de perfil:", error);
+                    setImageError(true);
+                } finally {
+                    setImageLoading(false);
+                }
+            } else {
+                setProfileImageUrl(null);
+                setImageLoading(false);
+                setImageError(false);
+            }
+        };
+
+        fetchProfileImage();
+
+        // 4. LIMPEZA: Revoga a URL do blob
+        // Usamos um 'return' dentro da função de efeito
+        return () => {
+            if (profileImageUrl && profileImageUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(profileImageUrl);
+            }
+        };
+        
+    // ⚠️ CORREÇÃO: Removido 'profileImageUrl' do array de dependências.
+    // Isso evita um loop infinito onde o 'setProfileImageUrl'
+    // dispara o 'useEffect' que o chama novamente.
+    }, [isAuthenticated, user]); 
+    // Fim do useEffect da Imagem
+
+    // ❌ REMOVIDO: A função 'handleLogin' foi removida.
+    // O AuthModal agora fala diretamente com o AuthContext (useAuth).
 
     const handleLogout = () => {
         signOut();
@@ -64,15 +123,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
         setProfileImageUrl(null);
         setImageLoading(false);
         setImageError(false);
-       window.location.href = '/';
+       // window.location.href = '/'; // O App.tsx já cuida do redirect
     };
 
-    // ✅ CORREÇÃO: Função para abrir modal de cadastro
     const openSignUpModal = () => {
         setShowSignUpModal(true);
     };
 
-    // ✅ Funções para imagens
+    // Funções para imagens (handlers de load/error do JSX)
     const handleImageError = () => {
         setImageError(true);
         setImageLoading(false);
@@ -83,10 +141,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
         setImageError(false);
     };
 
-    // ✅ Fechar menu ao clicar fora
+    // Fechar menu ao clicar fora
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (showUserMenu) {
+                // Fechamento simples
+                // (Pode precisar de lógica mais robusta se o botão de menu for clicado)
                 setShowUserMenu(false);
             }
         };
@@ -121,7 +181,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
                                 </div>
                             </Link>
                         </div>
-                                
+                            
                         {/* LADO DIREITO: Links, Dark Mode e Autenticação */}
                         <div className="flex items-center space-x-3">
                             
@@ -164,6 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
                                     >
                                         {/* IMAGEM DE PERFIL */}
                                         <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-300 dark:border-gray-600 flex-shrink-0">
+                                            {/* Condição: Mostra a imagem (se carregada) OU o fallback (ícone) */}
                                             {profileImageUrl && !imageError ? (
                                                 <>
                                                     {imageLoading && (
@@ -182,6 +243,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
                                                     />
                                                 </>
                                             ) : (
+                                                // Fallback (Erro ou sem imagem)
                                                 <div className="w-full h-full bg-emerald-600 flex items-center justify-center">
                                                     <User size={16} className="text-white" />
                                                 </div>
@@ -251,7 +313,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
                                                 {/* OPÇÕES DO MENU */}
                                                 <div className="py-1">
                                                     <Link 
-                                                        to="/profile"
+                                                        to="/perfil"
                                                         className="flex items-center space-x-3 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors duration-150"
                                                         onClick={() => setShowUserMenu(false)}
                                                     >
@@ -284,7 +346,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
 
                                     {/* BOTÃO CADASTRAR */}
                                     <button
-                                        onClick={openSignUpModal} // ✅ CORREÇÃO: Usando a nova função
+                                        onClick={openSignUpModal}
                                         className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 transition-colors duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 flex items-center space-x-2"
                                     >
                                         <UserPlus size={18} />
@@ -300,14 +362,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
             {/* Auth Modal */}
             <AnimatePresence>
                 {showAuthModal && (
+                    // ⚠️ CORREÇÃO: A prop 'onLogin' foi removida.
                     <AuthModal 
                         onClose={() => setShowAuthModal(false)}
-                        onLogin={handleLogin}
                     />
                 )}
             </AnimatePresence>
 
-            {/* ✅ SignUp Modal */}
+            {/* SignUp Modal */}
             <AnimatePresence>
                 {showSignUpModal && (
                     <SignUpModal 
