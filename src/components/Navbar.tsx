@@ -170,8 +170,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
                                 to={isAuthenticated ? "/dashboard" : "/"} 
                                 className="flex items-center space-x-3 transition-opacity hover:opacity-80"
                             >
-                                <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                                    <span className="text-white font-bold text-sm">🐄</span>
+                                <div className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                                    <img 
+                                        src="/src/img/logotipo.png" 
+                                        alt="Logo" 
+                                        className="w-10 h-10 object-cover" 
+                                    />
                                 </div>
                                 <div className="hidden sm:block">
                                     <h1 className="text-xl font-bold text-gray-900 dark:text-white">Rebanho Digital</h1>

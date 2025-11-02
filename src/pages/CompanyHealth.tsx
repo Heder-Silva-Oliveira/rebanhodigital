@@ -59,12 +59,33 @@ const getKPIStatus = (value: number, target: number, higherIsBetter: boolean, lo
     }
 };
 
+// ⚠️ CORREÇÃO: Classes 'dark:' adicionadas para todos os status
 const getColorClass = (status: string) => {
     switch (status) {
-        case 'green': return { bg: 'bg-green-50', border: 'border-green-500', dot: 'bg-green-500', text: 'text-green-600' };
-        case 'yellow': return { bg: 'bg-yellow-50', border: 'border-yellow-500', dot: 'bg-yellow-500', text: 'text-yellow-600' };
-        case 'red': return { bg: 'bg-red-50', border: 'border-red-500', dot: 'bg-red-500', text: 'text-red-600' };
-        default: return { bg: 'bg-gray-100', border: 'border-gray-300', dot: 'bg-gray-500', text: 'text-gray-600' };
+        case 'green': return { 
+            bg: 'bg-green-50 dark:bg-green-900/20', 
+            border: 'border-green-500 dark:border-green-700', 
+            dot: 'bg-green-500', 
+            text: 'text-green-600 dark:text-green-400' 
+        };
+        case 'yellow': return { 
+            bg: 'bg-yellow-50 dark:bg-yellow-900/20', 
+            border: 'border-yellow-500 dark:border-yellow-700', 
+            dot: 'bg-yellow-500', 
+            text: 'text-yellow-600 dark:text-yellow-400' 
+        };
+        case 'red': return { 
+            bg: 'bg-red-50 dark:bg-red-900/20', 
+            border: 'border-red-500 dark:border-red-700', 
+            dot: 'bg-red-500', 
+            text: 'text-red-600 dark:text-red-400' 
+        };
+        default: return { 
+            bg: 'bg-gray-100 dark:bg-gray-700', 
+            border: 'border-gray-300 dark:border-gray-600', 
+            dot: 'bg-gray-500', 
+            text: 'text-gray-600 dark:text-gray-300' 
+        };
     }
 };
 
@@ -262,8 +283,10 @@ const CompanyHealth: React.FC = () => {
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-                    <p className="font-medium text-gray-900 mb-2">{label}</p>
+                // ⚠️ CORREÇÃO: Adicionado dark mode ao tooltip
+                <div className="bg-white dark:bg-gray-900 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                    {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                    <p className="font-medium text-gray-900 dark:text-white mb-2">{label}</p>
                     {payload.map((entry: any, index: number) => {
                         const isMonetary = entry.dataKey === 'receitas' || entry.dataKey === 'despesas' || entry.dataKey === 'lucro';
                         const isMargin = entry.dataKey === 'margem';
@@ -289,8 +312,9 @@ const CompanyHealth: React.FC = () => {
                                     className="w-3 h-3 rounded-full" 
                                     style={{ backgroundColor: entry.color }}
                                 />
-                                <span className="text-gray-600">{entry.name}:</span>
-                                <span className="font-medium">{formattedValue}</span>
+                                {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                                <span className="text-gray-600 dark:text-gray-400">{entry.name}:</span>
+                                <span className="font-medium dark:text-white">{formattedValue}</span>
                             </div>
                         );
                     })}
@@ -303,40 +327,48 @@ const CompanyHealth: React.FC = () => {
     const scoreStatus = getColorClass(metrics.scoreGeral >= 80 ? 'green' : metrics.scoreGeral >= 50 ? 'yellow' : 'red');
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    // ⚠️ CORREÇÃO: Adicionado dark:bg-gray-900
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-screen-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="text-green-600" size={24} />
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+              <TrendingUp className="text-green-600 dark:text-green-400" size={24} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Saúde da Empresa</h1>
-              <p className="text-gray-600">Análise estratégica completa do seu negócio pecuário</p>
+              {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Saúde da Empresa</h1>
+              <p className="text-gray-600 dark:text-gray-400">Análise estratégica completa do seu negócio pecuário</p>
             </div>
           </div>
-          <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
+          {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+          <button className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
             <RefreshCw size={18} />
             <span>Atualizar Dados</span>
           </button>
         </div>
 
         {/* Score Geral */}
-                <div className={`${scoreStatus.bg} border ${getColorClass(scoreStatus.color).border} rounded-lg p-6 mb-8`}>
+                {/* ⚠️ CORREÇÃO: A lógica de 'getColorClass' já aplica as classes dark corretas */}
+                <div className={`${scoreStatus.bg} border ${scoreStatus.border} rounded-lg p-6 mb-8`}>
                     <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-3">
-                            <div className={`p-2 ${getColorClass(scoreStatus.color).bg} rounded-full`}>
+                            {/* ⚠️ CORREÇÃO: Aplicando 'bg' e 'text' corretos */}
+                            <div className={`p-2 ${scoreStatus.bg} rounded-full`}>
                                 <AlertTriangle className={`${scoreStatus.text}`} size={20} />
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-900">Saúde Geral do Negócio</h3>
-                                <p className="text-sm text-gray-600">Índice baseado nos principais indicadores</p>
+                                {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Saúde Geral do Negócio</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Índice baseado nos principais indicadores</p>
                             </div>
                         </div>
                         <div className="text-right">
                             <div className={`text-4xl font-bold ${scoreStatus.text} mb-1`}>{metrics.scoreGeral}</div>
-                            <div className="text-sm text-gray-600">de 100 pontos</div>
+                            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                            <div className="text-sm text-gray-600 dark:text-gray-400">de 100 pontos</div>
                             <div className="text-sm text-red-600 font-medium">Piorando</div> 
                             {/* A lógica 'Piorando' deve vir de uma comparação histórica, mas é mockada aqui */}
                         </div>
@@ -344,8 +376,10 @@ const CompanyHealth: React.FC = () => {
                 </div>
 
         {/* Tabs Navigation */}
-        <div className="bg-white rounded-lg shadow-sm mb-8">
-          <div className="border-b border-gray-200">
+        {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-8">
+          {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+          <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex space-x-8 px-6">
               {[
                 { id: 'kpis', name: 'Painel de KPIs', icon: BarChart3, desc: 'Indicadores críticos e score de saúde' },
@@ -357,16 +391,18 @@ const CompanyHealth: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
+                  // ⚠️ CORREÇÃO: Adicionado dark mode
                   className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === tab.id
-                      ? 'border-green-500 text-green-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-green-500 text-green-600 dark:text-green-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
                   <tab.icon size={18} />
                   <div className="text-left">
                     <div>{tab.name}</div>
-                    <div className="text-xs text-gray-400 font-normal">{tab.desc}</div>
+                    {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                    <div className="text-xs text-gray-400 dark:text-gray-500 font-normal">{tab.desc}</div>
                   </div>
                 </button>
               ))}
@@ -385,14 +421,16 @@ const CompanyHealth: React.FC = () => {
                                 const colors = getColorClass(status.color);
                                 
                                 return (
+                                    // ⚠️ CORREÇÃO: 'colors' já inclui classes dark
                                     <div className={`${colors.bg} border-l-4 ${colors.border} rounded-lg p-6`}>
                                         <div className="flex items-center justify-between mb-4">
                                             <div className={`w-3 h-3 ${colors.dot} rounded-full`}></div>
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Taxa de Lotação</h3>
-                                            <div className="text-3xl font-bold text-gray-900 mb-2">{metrics.taxaLotacao.toFixed(2)}<span className="text-sm font-normal"> UA/ha</span></div>
-                                            <div className="text-sm text-gray-600">Meta: 1.0-1.5</div>
+                                            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Taxa de Lotação</h3>
+                                            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{metrics.taxaLotacao.toFixed(2)}<span className="text-sm font-normal"> UA/ha</span></div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">Meta: 1.0-1.5</div>
                                         </div>
                                     </div>
                                 )
@@ -409,9 +447,9 @@ const CompanyHealth: React.FC = () => {
                                             <div className={`w-3 h-3 ${colors.dot} rounded-full`}></div>
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Ganho Médio Diário</h3>
-                                            <div className="text-3xl font-bold text-gray-900 mb-2">{metrics.gmdMedio.toFixed(3)} <span className="text-sm font-normal">kg/dia</span></div>
-                                            <div className="text-sm text-gray-600">Meta: &gt; 0.8</div>
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Ganho Médio Diário</h3>
+                                            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{metrics.gmdMedio.toFixed(3)} <span className="text-sm font-normal">kg/dia</span></div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">Meta: &gt; 0.8</div>
                                         </div>
                                     </div>
                                 )
@@ -429,9 +467,9 @@ const CompanyHealth: React.FC = () => {
                                             <div className={`w-3 h-3 ${colors.dot} rounded-full`}></div>
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Taxa de Desmama</h3>
-                                            <div className="text-3xl font-bold text-gray-900 mb-2">{taxaDesmama.toFixed(1)} <span className="text-sm font-normal">%</span></div>
-                                            <div className="text-sm text-gray-600">Meta: &gt; 85%</div>
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Taxa de Desmama</h3>
+                                            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{taxaDesmama.toFixed(1)} <span className="text-sm font-normal">%</span></div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">Meta: &gt; 85%</div>
                                         </div>
                                     </div>
                                 )
@@ -451,9 +489,9 @@ const CompanyHealth: React.FC = () => {
                                             <div className={`w-3 h-3 ${colors.dot} rounded-full`}></div>
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Custo por Arroba</h3>
-                                            <div className="text-3xl font-bold text-gray-900 mb-2">{metrics.custoPorArroba.toFixed(0)} <span className="text-sm font-normal">R$</span></div>
-                                            <div className="text-sm text-gray-600">Meta: &lt; {MEDIA_REGIONAL.custoArroba}</div>
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Custo por Arroba</h3>
+                                            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{metrics.custoPorArroba.toFixed(0)} <span className="text-sm font-normal">R$</span></div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">Meta: &lt; {MEDIA_REGIONAL.custoArroba}</div>
                                         </div>
                                     </div>
                                 )
@@ -470,9 +508,9 @@ const CompanyHealth: React.FC = () => {
                                             <div className={`w-3 h-3 ${colors.dot} rounded-full`}></div>
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Margem de Lucro</h3>
-                                            <div className="text-3xl font-bold text-gray-900 mb-2">{metrics.margemMedia.toFixed(1)} <span className="text-sm font-normal">%</span></div>
-                                            <div className="text-sm text-gray-600">Meta: &gt; {MEDIA_REGIONAL.margem}%</div>
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Margem de Lucro</h3>
+                                            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{metrics.margemMedia.toFixed(1)} <span className="text-sm font-normal">%</span></div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">Meta: &gt; {MEDIA_REGIONAL.margem}%</div>
                                         </div>
                                     </div>
                                 )
@@ -489,9 +527,9 @@ const CompanyHealth: React.FC = () => {
                                             <div className={`w-3 h-3 ${colors.dot} rounded-full`}></div>
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Receita por Hectare</h3>
-                                            <div className="text-3xl font-bold text-gray-900 mb-2">{formatCurrency(metrics.receitaPorHectare)} <span className="text-sm font-normal">/ha/ano</span></div>
-                                            <div className="text-sm text-gray-600">Meta: &gt; R$ 3.000</div>
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Receita por Hectare</h3>
+                                            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{formatCurrency(metrics.receitaPorHectare)} <span className="text-sm font-normal">/ha/ano</span></div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">Meta: &gt; R$ 3.000</div>
                                         </div>
                                     </div>
                                 )
@@ -500,64 +538,66 @@ const CompanyHealth: React.FC = () => {
                         
                         {/* Ponto de Equilíbrio */}
                         {(() => {
-                        const precoVendaArroba = MEDIA_REGIONAL.precoVenda; // Usa o valor da constante
-                        const lucroLiquido = metrics.lucroLiquido; // O prejuízo atual (negativo)
-                        
-                        // 1. Calcula a Margem de Segurança (PE) em Arrobas. Usa Math.abs para o valor exibido.
-                        const margemSegurancaArrobas = Math.abs(lucroLiquido / precoVendaArroba); 
-                        const peArrobas = margemSegurancaArrobas.toFixed(0); 
+                            const precoVendaArroba = MEDIA_REGIONAL.precoVenda; // Usa o valor da constante
+                            const lucroLiquido = metrics.lucroLiquido; // O prejuízo atual (negativo)
+                            
+                            const margemSegurancaArrobas = Math.abs(lucroLiquido / precoVendaArroba); 
+                            const peArrobas = margemSegurancaArrobas.toFixed(0); 
 
-                        // 2. Define o Status (Cor e Texto)
-                        const statusColor = lucroLiquido >= 0 ? "text-green-600" : "text-red-600";
-                        const statusText = lucroLiquido >= 0 ? "Margem de Segurança" : "Déficit Necessário";
-                        
-                        // 3. Define a Exibição (Inclui o sinal de menos se for prejuízo)
-                        const valorExibido = lucroLiquido >= 0 
-                                            ? peArrobas 
-                                            : `-${peArrobas}`; 
+                            const statusColor = lucroLiquido >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400";
+                            const statusText = lucroLiquido >= 0 ? "Margem de Segurança" : "Déficit Necessário";
+                            
+                            const valorExibido = lucroLiquido >= 0 
+                                                ? peArrobas 
+                                                : `-${peArrobas}`; 
 
-                        return (
-                            <div className="bg-white border border-gray-200 rounded-lg p-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-1">Arrobas para Lucro Zero</h3>
-                                        <p className="text-sm text-gray-600">{statusText}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className={`text-4xl font-bold ${statusColor} mb-1`}>{valorExibido}</div>
-                                        <div className="text-sm text-gray-600">arrobas</div>
+                            return (
+                                // ⚠️ CORREÇÃO: Adicionado dark mode
+                                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Arrobas para Lucro Zero</h3>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{statusText}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className={`text-4xl font-bold ${statusColor} mb-1`}>{valorExibido}</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">arrobas</div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    })()}
+                            );
+                        })()}
                         
                     </div>
                 )}
+
         {/* Análise de Tendências */}
         {activeTab === 'trends' && (
           <div className="space-y-8">
             {/* Header da seção */}
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Análise de Tendências</h2>
-                <p className="text-gray-600">Evolução histórica dos principais indicadores</p>
+                {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Análise de Tendências</h2>
+                <p className="text-gray-600 dark:text-gray-400">Evolução histórica dos principais indicadores</p>
               </div>
               <div className="flex space-x-4">
+                {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
                 <select
                   value={selectedMetric}
                   onChange={(e) => setSelectedMetric(e.target.value)}
-                  className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option value="Lucratividade">Lucratividade</option>
                   <option value="Margem">Margem</option>
                   <option value="Receitas">Receitas</option>
                   <option value="Despesas">Despesas</option>
                 </select>
+                {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
                 <select
                   value={selectedPeriod}
                   onChange={(e) => setSelectedPeriod(e.target.value)}
-                  className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option value="12 meses">12 meses</option>
                   <option value="6 meses">6 meses</option>
@@ -569,63 +609,65 @@ const CompanyHealth: React.FC = () => {
             {/* Cards de Métricas */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Lucro Médio */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <TrendingUp className="text-blue-600" size={20} />
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <TrendingUp className="text-blue-600 dark:text-blue-400" size={20} />
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-red-600 font-medium">R$ {metrics.lucroLiquido}</div>
-                    <div className="text-xs text-gray-500">vs período anterior</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">vs período anterior</div>
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-600 mb-1">Lucro Médio</h3>
-                  <div className="text-2xl font-bold text-gray-900">R$ {metrics.lucroLiquido}</div>
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Lucro Médio</h3>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">R$ {metrics.lucroLiquido}</div>
                 </div>
               </div>
 
               {/* Margem Média */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Target className="text-green-600" size={20} />
+                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <Target className="text-green-600 dark:text-green-400" size={20} />
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-green-600 font-medium">+0.0%</div>
-                    <div className="text-xs text-gray-500">vs período anterior</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">vs período anterior</div>
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-600 mb-1">Margem Média</h3>
-                  <div className="text-2xl font-bold text-gray-900">{metrics.margemMedia}%</div>
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Margem Média</h3>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{metrics.margemMedia}%</div>
                 </div>
               </div>
 
               {/* Score de Saúde */}
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+              <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <BarChart3 className="text-purple-600" size={20} />
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <BarChart3 className="text-purple-600 dark:text-purple-400" size={20} />
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-red-600 font-medium">Piorando</div>
-                    <div className="text-xs text-gray-500">tendência atual</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">tendência atual</div>
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-600 mb-1">Score de Saúde</h3>
-                  <div className="text-2xl font-bold text-gray-900">{metrics.scoreGeral}/100</div>
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Score de Saúde</h3>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{metrics.scoreGeral}/100</div>
                 </div>
               </div>
             </div>
 
             {/* Gráfico de Análise de Lucratividade */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Análise de Lucratividade</h3>
-                  <p className="text-sm text-gray-600">Receitas, despesas, lucro e margem de lucro ao longo do tempo</p>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Análise de Lucratividade</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Receitas, despesas, lucro e margem de lucro ao longo do tempo</p>
                 </div>
                 <Calendar className="text-gray-400" size={20} />
               </div>
@@ -633,31 +675,30 @@ const CompanyHealth: React.FC = () => {
               <div className="h-96">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={trendsData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    {/* ⚠️ CORREÇÃO: Cor do grid ajustada */}
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.2} />
                     <XAxis 
                       dataKey="month" 
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 12, fill: '#666' }}
+                      tick={{ fontSize: 12, fill: '#9ca3af' }} // Cor neutra
                     />
                     <YAxis 
                       yAxisId="left"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 12, fill: '#666' }}
-                      
+                      tick={{ fontSize: 12, fill: '#9ca3af' }} // Cor neutra
                     />
                     <YAxis 
                       yAxisId="right"
                       orientation="right"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 12, fill: '#666' }}
+                      tick={{ fontSize: 12, fill: '#9ca3af' }} // Cor neutra
                       domain={[0, 100]}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     
-                    {/* Barras de Receitas (Positivas) */}
                     <Bar 
                       yAxisId="left"
                       dataKey="receitas" 
@@ -666,7 +707,6 @@ const CompanyHealth: React.FC = () => {
                       radius={[2, 2, 0, 0]}
                     />
                     
-                    {/* Barras de Despesas (Negativas) */}
                     <Bar 
                       yAxisId="left"
                       dataKey="despesas" 
@@ -675,7 +715,6 @@ const CompanyHealth: React.FC = () => {
                       radius={[0, 0, 2, 2]}
                     />
                     
-                    {/* Linha de Margem */}
                     <Line 
                       yAxisId="right"
                       type="monotone" 
@@ -696,37 +735,39 @@ const CompanyHealth: React.FC = () => {
         {activeTab === 'comparison' && (
           <div className="space-y-8">
             {/* Card "Acima da Média Regional" */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Trophy className="text-green-600" size={24} />
+                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <Trophy className="text-green-600 dark:text-green-400" size={24} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Acima da Média Regional</h3>
-                    <p className="text-sm text-gray-600">Parabéns! Seu negócio está performando melhor que a maioria dos produtores da região.</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Acima da Média Regional</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Parabéns! Seu negócio está performando melhor que a maioria dos produtores da região.</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-4xl font-bold text-green-600 mb-1">90°</div>
-                  <div className="text-sm text-gray-600">percentil</div>
+                  <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-1">90°</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">percentil</div>
                 </div>
               </div>
             </div>
 
             {/* Comparação Visual de Performance */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Comparação Visual de Performance</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Comparação Visual de Performance</h3>
               </div>
 
               <div className="h-96">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData} margin={{ top: 20, right: 80, bottom: 20, left: 80 }}>
-                    <PolarGrid stroke="#e5e7eb" />
+                    <PolarGrid stroke="#e5e7eb" strokeOpacity={0.2} />
                     <PolarAngleAxis 
                       dataKey="indicator" 
-                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      tick={{ fontSize: 12, fill: '#9ca3af' }}
                     />
                     <PolarRadiusAxis 
                       angle={0} 
@@ -755,7 +796,7 @@ const CompanyHealth: React.FC = () => {
                       verticalAlign="bottom" 
                       height={36}
                       iconType="line"
-                      wrapperStyle={{ fontSize: '14px' }}
+                      wrapperStyle={{ fontSize: '14px', color: '#9ca3af' }} // ⚠️ CORREÇÃO: Cor da legenda
                     />
                   </RadarChart>
                 </ResponsiveContainer>
@@ -763,30 +804,31 @@ const CompanyHealth: React.FC = () => {
             </div>
 
             {/* Comparação Detalhada por Indicador */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Comparação Detalhada por Indicador</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Comparação Detalhada por Indicador</h3>
               </div>
 
               <div className="space-y-8">
                 {/* Taxa de Lotação */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-gray-900">Taxa de Lotação</h4>
-                    <span className="text-sm font-medium text-red-600">93.3% menor</span>
+                    <h4 className="font-medium text-gray-900 dark:text-white">Taxa de Lotação</h4>
+                    <span className="text-sm font-medium text-red-600 dark:text-red-400">93.3% menor</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-blue-600">Sua Propriedade</span>
-                      <span className="font-medium">{metrics.taxaLotacao.toFixed(2)} UA/ha</span>
+                      <span className="text-blue-600 dark:text-blue-400">Sua Propriedade</span>
+                      <span className="font-medium dark:text-white">{metrics.taxaLotacao.toFixed(2)} UA/ha</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-green-600">Média Regional</span>
-                      <span className="font-medium">1.20 UA/ha</span>
+                      <span className="text-green-600 dark:text-green-400">Média Regional</span>
+                      <span className="font-medium dark:text-white">1.20 UA/ha</span>
                     </div>
                   </div>
                   <div className="mt-3 relative">
-                    <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                       <div className="bg-green-500 h-3 rounded-full" style={{ width: '100%' }}></div>
                       <div className="bg-teal-600 h-3 rounded-full absolute top-0 left-0" style={{ width: '7%' }}></div>
                     </div>
@@ -796,21 +838,21 @@ const CompanyHealth: React.FC = () => {
                 {/* GMD */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-gray-900">GMD</h4>
-                    <span className="text-sm font-medium text-red-600">16.7% menor</span>
+                    <h4 className="font-medium text-gray-900 dark:text-white">GMD</h4>
+                    <span className="text-sm font-medium text-red-600 dark:text-red-400">16.7% menor</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-blue-600">Sua Propriedade</span>
-                      <span className="font-medium">{metrics.gmdMedio.toFixed(3)} kg/dia</span>
+                      <span className="text-blue-600 dark:text-blue-400">Sua Propriedade</span>
+                      <span className="font-medium dark:text-white">{metrics.gmdMedio.toFixed(3)} kg/dia</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-green-600">Média Regional</span>
-                      <span className="font-medium">{ MEDIA_REGIONAL.gmd} kg/dia</span>
+                      <span className="text-green-600 dark:text-green-400">Média Regional</span>
+                      <span className="font-medium dark:text-white">{ MEDIA_REGIONAL.gmd} kg/dia</span>
                     </div>
                   </div>
                   <div className="mt-3 relative">
-                    <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                       <div className="bg-green-500 h-3 rounded-full" style={{ width: '100%' }}></div>
                       <div className="bg-teal-600 h-3 rounded-full absolute top-0 left-0" style={{ width: '84%' }}></div>
                     </div>
@@ -820,21 +862,21 @@ const CompanyHealth: React.FC = () => {
                 {/* Custo/Arroba */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-gray-900">Custo/Arroba</h4>
-                    <span className="text-sm font-medium text-green-600">97.2% menor</span>
+                    <h4 className="font-medium text-gray-900 dark:text-white">Custo/Arroba</h4>
+                    <span className="text-sm font-medium text-green-600 dark:text-green-400">97.2% menor</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-blue-600">Sua Propriedade</span>
-                      <span className="font-medium">R$ 6</span>
+                      <span className="text-blue-600 dark:text-blue-400">Sua Propriedade</span>
+                      <span className="font-medium dark:text-white">R$ 6</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-green-600">Média Regional</span>
-                      <span className="font-medium">R$ { MEDIA_REGIONAL.custoArroba}</span>
+                      <span className="text-green-600 dark:text-green-400">Média Regional</span>
+                      <span className="font-medium dark:text-white">R$ { MEDIA_REGIONAL.custoArroba}</span>
                     </div>
                   </div>
                   <div className="mt-3 relative">
-                    <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                       <div className="bg-green-500 h-3 rounded-full" style={{ width: '100%' }}></div>
                       <div className="bg-teal-600 h-3 rounded-full absolute top-0 left-0" style={{ width: '3%' }}></div>
                     </div>
@@ -844,21 +886,21 @@ const CompanyHealth: React.FC = () => {
                 {/* Margem de Lucro */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-gray-900">Margem de Lucro</h4>
-                    <span className="text-sm font-medium text-green-600">257.8% maior</span>
+                    <h4 className="font-medium text-gray-900 dark:text-white">Margem de Lucro</h4>
+                    <span className="text-sm font-medium text-green-600 dark:text-green-400">257.8% maior</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-blue-600">Sua Propriedade</span>
-                      <span className="font-medium">{metrics.margemMedia}%</span>
+                      <span className="text-blue-600 dark:text-blue-400">Sua Propriedade</span>
+                      <span className="font-medium dark:text-white">{metrics.margemMedia}%</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-green-600">Média Regional</span>
-                      <span className="font-medium">{ MEDIA_REGIONAL.margem}%</span>
+                      <span className="text-green-600 dark:text-green-400">Média Regional</span>
+                      <span className="font-medium dark:text-white">{ MEDIA_REGIONAL.margem}%</span>
                     </div>
                   </div>
                   <div className="mt-3 relative">
-                    <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                       <div className="bg-green-500 h-3 rounded-full" style={{ width: '28%' }}></div>
                       <div className="bg-blue-500 h-3 rounded-full absolute top-0 left-0" style={{ width: '100%' }}></div>
                     </div>
@@ -868,9 +910,10 @@ const CompanyHealth: React.FC = () => {
             </div>
 
             {/* Oportunidades de Melhoria */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-6">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Oportunidades de Melhoria</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Oportunidades de Melhoria</h3>
               </div>
 
               <div className="space-y-4">
@@ -879,8 +922,8 @@ const CompanyHealth: React.FC = () => {
                     <span className="text-white text-xs font-bold">1</span>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Melhorar Taxa de Lotação</h4>
-                    <p className="text-sm text-gray-600">Aumentar para 1.20 UA/ha para atingir a média regional</p>
+                    <h4 className="font-medium text-gray-900 dark:text-white">Melhorar Taxa de Lotação</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Aumentar para 1.20 UA/ha para atingir a média regional</p>
                   </div>
                 </div>
 
@@ -889,8 +932,8 @@ const CompanyHealth: React.FC = () => {
                     <span className="text-white text-xs font-bold">2</span>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Melhorar GMD</h4>
-                    <p className="text-sm text-gray-600">Aumentar para 0.75 kg/dia para atingir a média regional</p>
+                    <h4 className="font-medium text-gray-900 dark:text-white">Melhorar GMD</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Aumentar para 0.75 kg/dia para atingir a média regional</p>
                   </div>
                 </div>
               </div>
@@ -898,25 +941,27 @@ const CompanyHealth: React.FC = () => {
           </div>
         )}
 
-         {/* Aba de Recomendações - CORRIGIDA */}
+        {/* Aba de Recomendações */}
                 {activeTab === 'recommendations' && (
                     <div className="space-y-8">
                         {/* Header da seção */}
                         <div className="flex justify-between items-center">
                             <div className="flex items-center space-x-3">
-                                <div className="p-2 bg-yellow-100 rounded-lg">
-                                    <Lightbulb className="text-yellow-600" size={24} />
+                                {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                                <div className="p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg">
+                                    <Lightbulb className="text-yellow-600 dark:text-yellow-400" size={24} />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold text-gray-900 mb-1">Recomendações Inteligentes</h2>
-                                    <p className="text-gray-600">Sugestões personalizadas baseadas na análise dos seus dados</p>
+                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Recomendações Inteligentes</h2>
+                                    <p className="text-gray-600 dark:text-gray-400">Sugestões personalizadas baseadas na análise dos seus dados</p>
                                 </div>
                             </div>
                             <div className="flex space-x-4">
+                                {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="p-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                                    className="p-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 >
                                     <option value="Todas as categorias">Todas as categorias</option>
                                     <option value="Nutrição">Nutrição</option>
@@ -924,10 +969,11 @@ const CompanyHealth: React.FC = () => {
                                     <option value="Produtividade">Produtividade</option>
                                     <option value="Financeiro">Financeiro</option>
                                 </select>
+                                {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
                                 <select
                                     value={selectedPriority}
                                     onChange={(e) => setSelectedPriority(e.target.value)}
-                                    className="p-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                                    className="p-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 >
                                     <option value="Todas as prioridades">Todas as prioridades</option>
                                     <option value="Alta">Alta</option>
@@ -940,98 +986,102 @@ const CompanyHealth: React.FC = () => {
                         {/* Cards de Resumo */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* ROI Potencial Total */}
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6">
                                 <div className="flex items-center justify-between mb-4">
-                                    <div className="text-green-600 font-medium text-sm">ROI Potencial Total</div>
-                                    <TrendingUp className="text-green-600" size={20} />
+                                    <div className="text-green-600 dark:text-green-400 font-medium text-sm">ROI Potencial Total</div>
+                                    <TrendingUp className="text-green-600 dark:text-green-400" size={20} />
                                 </div>
-                                <div className="text-4xl font-bold text-gray-900 mb-1">{recommendationMetrics.roiPotencialTotal}%</div>
+                                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">{recommendationMetrics.roiPotencialTotal}%</div>
                             </div>
 
                             {/* Ações Críticas */}
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-6">
                                 <div className="flex items-center justify-between mb-4">
-                                    <div className="text-red-600 font-medium text-sm">Ações Críticas</div>
+                                    <div className="text-red-600 dark:text-red-400 font-medium text-sm">Ações Críticas</div>
                                     <div className="flex items-center space-x-1">
-                                        <AlertTriangle className="text-red-600" size={16} />
+                                        <AlertTriangle className="text-red-600 dark:text-red-400" size={16} />
                                     </div>
                                 </div>
-                                <div className="text-4xl font-bold text-gray-900 mb-1">{recommendationMetrics.acoesCriticas}</div>
+                                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">{recommendationMetrics.acoesCriticas}</div>
                             </div>
 
                             {/* Total de Recomendações */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
                                 <div className="flex items-center justify-between mb-4">
-                                    <div className="text-blue-600 font-medium text-sm">Total de Recomendações</div>
-                                    <Lightbulb className="text-blue-600" size={20} />
+                                    <div className="text-blue-600 dark:text-blue-400 font-medium text-sm">Total de Recomendações</div>
+                                    <Lightbulb className="text-blue-600 dark:text-blue-400" size={20} />
                                 </div>
-                                <div className="text-4xl font-bold text-gray-900 mb-1">{recommendationMetrics.totalRecomendacoes}</div>
+                                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">{recommendationMetrics.totalRecomendacoes}</div>
                             </div>
                         </div>
 
                         {/* Lista de Recomendações */}
                         <div className="space-y-6">
-    {/* Substituir as duas divs de "Recomendação 1" e "Recomendação 2" */}
-    {/* ... pelo código abaixo: */}
-
-    {filteredRecommendations.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <CheckCircle className="text-green-500 mx-auto mb-4" size={48} />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Excelente Trabalho!</h3>
-            <p className="text-gray-600">Todos os indicadores estão dentro das metas estabelecidas.</p>
-        </div>
-    ) : (
-        filteredRecommendations.map((rec) => {
-            const priorityColor = rec.priority === 'Alta' ? 'red' : rec.priority === 'Média' ? 'yellow' : 'blue'; // Alterei para blue para baixa prioridade
-            const colors = getColorClass(priorityColor);
-
-            return (
-                <div 
-                    key={rec.id} 
-                    className={`bg-white border-l-4 border-${priorityColor}-500 rounded-lg shadow-sm overflow-hidden`}
-                >
-                    <div className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center space-x-3">
-                                <div className="p-2 bg-gray-100 rounded-lg">
-                                    {/* Ícone dinâmico - Exemplo simplificado */}
-                                    <Lightbulb className={`text-${priorityColor}-600`} size={20} />
+                            {filteredRecommendations.length === 0 ? (
+                                // ⚠️ CORREÇÃO: Adicionado dark mode
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 text-center">
+                                    <CheckCircle className="text-green-500 mx-auto mb-4" size={48} />
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Excelente Trabalho!</h3>
+                                    <p className="text-gray-600 dark:text-gray-400">Todos os indicadores estão dentro das metas estabelecidas.</p>
                                 </div>
-                                
-                                <div>
-                                    <h3 className="text-lg font-semibold text-gray-900">{rec.title}</h3>
-                                    <div className="flex items-center space-x-2 mt-1">
-                                        <span className="text-sm text-gray-600">{rec.category}</span>
-                                        <span className={`px-2 py-1 bg-${priorityColor}-100 text-${priorityColor}-600 text-xs font-medium rounded-full`}>
-                                            {rec.priority}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <p className="text-gray-700 mb-6">{rec.description}</p>
+                            ) : (
+                                filteredRecommendations.map((rec) => {
+                                    const priorityColor = rec.priority === 'Alta' ? 'red' : rec.priority === 'Média' ? 'yellow' : 'blue';
+                                    const colors = getColorClass(priorityColor);
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 rounded-lg p-4">
-                            <div>
-                                <div className="text-sm font-medium text-blue-600 mb-1">IMPACTO ESPERADO</div>
-                                <div className="text-lg font-semibold text-gray-900">{rec.impacto}</div>
-                            </div>
-                            <div>
-                                <div className="text-sm font-medium text-orange-600 mb-1">ESFORÇO NECESSÁRIO</div>
-                                <div className="text-lg font-semibold text-gray-900">{rec.esforco}</div>
-                            </div>
-                            <div>
-                                <div className="text-sm font-medium text-green-600 mb-1">ROI ESTIMADO</div>
-                                <div className="text-lg font-semibold text-gray-900">{rec.roi}</div>
-                            </div>
+                                    return (
+                                        // ⚠️ CORREÇÃO: Adicionado dark mode ao card
+                                        <div 
+                                            key={rec.id} 
+                                            className={`bg-white dark:bg-gray-800 border-l-4 border-${priorityColor}-500 dark:border-${priorityColor}-400 rounded-lg shadow-sm overflow-hidden`}
+                                        >
+                                            <div className="p-6">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <div className="flex items-center space-x-3">
+                                                        {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                                                        <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                                            <Lightbulb className={`text-${priorityColor}-600 dark:text-${priorityColor}-400`} size={20} />
+                                                        </div>
+                                                        
+                                                        <div>
+                                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{rec.title}</h3>
+                                                            <div className="flex items-center space-x-2 mt-1">
+                                                                <span className="text-sm text-gray-600 dark:text-gray-400">{rec.category}</span>
+                                                                {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                                                                <span className={`px-2 py-1 bg-${priorityColor}-100 dark:bg-${priorityColor}-900/30 text-${priorityColor}-600 dark:text-${priorityColor}-300 text-xs font-medium rounded-full`}>
+                                                                    {rec.priority}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <p className="text-gray-700 dark:text-gray-300 mb-6">{rec.description}</p>
+
+                                                {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                                                    <div>
+                                                        <div className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">IMPACTO ESPERADO</div>
+                                                        <div className="text-lg font-semibold text-gray-900 dark:text-white">{rec.impacto}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-medium text-orange-600 dark:text-orange-400 mb-1">ESFORÇO NECESSÁRIO</div>
+                                                        <div className="text-lg font-semibold text-gray-900 dark:text-white">{rec.esforco}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">ROI ESTIMADO</div>
+                                                        <div className="text-lg font-semibold text-gray-900 dark:text-white">{rec.roi}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
-                    </div>
-                </div>
-            );
-        })
-    )}
-</div>
                     </div>
                 )}
 
@@ -1039,22 +1089,23 @@ const CompanyHealth: React.FC = () => {
         {activeTab === 'report' && (
           <div className="space-y-8">
             {/* Header da seção com seletor de ano e botão de exportar */}
-            <div className="bg-white rounded-lg shadow-sm">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 border-b border-gray-200">
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <FileText className="text-blue-600" size={24} />
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                    <FileText className="text-blue-600 dark:text-blue-400" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-1">Relatório Anual de Saúde da Empresa</h2>
-                    <p className="text-gray-600">Análise completa do desempenho e planejamento estratégico</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Relatório Anual de Saúde da Empresa</h2>
+                    <p className="text-gray-600 dark:text-gray-400">Análise completa do desempenho e planejamento estratégico</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4 mt-4 sm:mt-0">
                   <select
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(e.target.value)}
-                    className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   >
                     <option value="2025">2025</option>
                     <option value="2024">2024</option>
@@ -1079,22 +1130,23 @@ const CompanyHealth: React.FC = () => {
             </div>
 
             {/* Resumo Executivo */}
-            <div className="bg-white rounded-lg shadow-sm p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Resumo Executivo</h2>
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Resumo Executivo</h2>
               
               {/* Cards de métricas principais */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 {/* Score de Saúde */}
                 <div className="text-center">
-                  <div className="text-sm font-medium text-blue-600 mb-2">Score de Saúde</div>
-                  <div className="text-4xl font-bold text-gray-900 mb-1">{metrics.scoreGeral}</div>
-                  <div className="text-sm text-gray-600">de 100 pontos</div>
+                  <div className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">Score de Saúde</div>
+                  <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">{metrics.scoreGeral}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">de 100 pontos</div>
                 </div>
 
                 {/* Lucro Anual */}
                 <div className="text-center">
-                  <div className="text-sm font-medium text-green-600 mb-2">Lucro Anual</div>
-                  <div className="text-4xl font-bold text-gray-900 mb-1">R$ {metrics.lucroLiquido}</div>
+                  <div className="text-sm font-medium text-green-600 dark:text-green-400 mb-2">Lucro Anual</div>
+                  <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">R$ {metrics.lucroLiquido}</div>
                   <div className="text-sm text-blue-600 flex items-center justify-center">
                     <TrendingDown size={14} className="mr-1" />
                     0.0%
@@ -1103,91 +1155,94 @@ const CompanyHealth: React.FC = () => {
 
                 {/* Margem de Lucro */}
                 <div className="text-center">
-                  <div className="text-sm font-medium text-yellow-600 mb-2">Margem de Lucro</div>
-                  <div className="text-4xl font-bold text-gray-900 mb-1">{metrics.margemMedia}%</div>
-                  <div className="text-sm text-gray-600">média anual</div>
+                  <div className="text-sm font-medium text-yellow-600 dark:text-yellow-400 mb-2">Margem de Lucro</div>
+                  <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">{metrics.margemMedia}%</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">média anual</div>
                 </div>
 
                 {/* GMD Médio */}
                 <div className="text-center">
-                  <div className="text-sm font-medium text-purple-600 mb-2">GMD Médio</div>
-                  <div className="text-4xl font-bold text-gray-900 mb-1">{ metrics.gmdMedio.toFixed(3)} kg</div>
-                  <div className="text-sm text-gray-600">por dia</div>
+                  <div className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-2">GMD Médio</div>
+                  <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">{ metrics.gmdMedio.toFixed(3)} kg</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">por dia</div>
                 </div>
               </div>
 
               {/* Descrição do desempenho */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <p className="text-gray-700 leading-relaxed">
+              {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                   O ano de 2025 apresentou um desempenho satisfatório com score de saúde de 70 pontos. O lucro apresentou declínio de 0.0% em relação ao ano anterior, 
                   demonstrando desafios que precisam ser endereçados na operação.
                 </p>
               </div>
             </div>
 
-        {/* GRÁFICO DE ANÁLISE DE LUCRATIVIDADE (Bloco Principal) */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-            
-            {/* 1. HEADER DO GRÁFICO */}
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Análise de Lucratividade</h3>
-                    <p className="text-sm text-gray-600">Receitas, despesas, lucro e margem de lucro ao longo do tempo</p>
+            {/* GRÁFICO DE ANÁLISE DE LUCRATIVIDADE (Bloco Principal) */}
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                
+                {/* 1. HEADER DO GRÁFICO */}
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Análise de Lucratividade</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Receitas, despesas, lucro e margem de lucro ao longo do tempo</p>
+                    </div>
+                    <Calendar className="text-gray-400" size={20} />
                 </div>
-                <Calendar className="text-gray-400" size={20} />
-            </div>
 
-            {/* 2. CONTAINER REAL DO GRÁFICO */}
-            <div className="h-96"> {/* Usa a altura total aqui */}
-                <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={trendsData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        {/* Eixos, Barras, Linha de Margem, Tooltip, etc. */}
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
-                        <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
-                        <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} domain={[0, 100]} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar yAxisId="left" dataKey="receitas" fill="#ef4444" name="Receitas" radius={[2, 2, 0, 0]} />
-                        <Bar yAxisId="left" dataKey="despesas" fill="#3b82f6" name="Despesas" radius={[0, 0, 2, 2]} />
-                        <Line yAxisId="right" type="monotone" dataKey="margem" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }} name="Margem (%)" />
-                    </ComposedChart>
-                </ResponsiveContainer>
+                {/* 2. CONTAINER REAL DO GRÁFICO */}
+                <div className="h-96"> {/* Usa a altura total aqui */}
+                    <ResponsiveContainer width="100%" height="100%">
+                        <ComposedChart data={trendsData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                            {/* Eixos, Barras, Linha de Margem, Tooltip, etc. */}
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.2} />
+                            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
+                            <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
+                            <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} domain={[0, 100]} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Bar yAxisId="left" dataKey="receitas" fill="#ef4444" name="Receitas" radius={[2, 2, 0, 0]} />
+                            <Bar yAxisId="left" dataKey="despesas" fill="#3b82f6" name="Despesas" radius={[0, 0, 2, 2]} />
+                            <Line yAxisId="right" type="monotone" dataKey="margem" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }} name="Margem (%)" />
+                        </ComposedChart>
+                    </ResponsiveContainer>
+                </div>
+                {/* FIM do Gráfico de Lucratividade */}
             </div>
-            {/* FIM do Gráfico de Lucratividade */}
-        </div>
 
             {/* Comparativo com Ano Anterior */}
-            <div className="bg-white rounded-lg shadow-sm p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Comparativo com Ano Anterior</h2>
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Comparativo com Ano Anterior</h2>
               
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">INDICADOR</th>
-                      <th className="text-center py-3 px-4 font-medium text-gray-900">2024</th>
-                      <th className="text-center py-3 px-4 font-medium text-gray-900">2025</th>
-                      <th className="text-center py-3 px-4 font-medium text-gray-900">VARIAÇÃO</th>
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">INDICADOR</th>
+                      <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">2024</th>
+                      <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">2025</th>
+                      <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">VARIAÇÃO</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-gray-100">
-                      <td className="py-4 px-4 text-gray-900">Receita Total</td>
-                      <td className="py-4 px-4 text-center text-gray-700">R$ 0</td>
-                      <td className="py-4 px-4 text-center text-gray-700">R$ {metrics.totalReceitas}</td>
-                      <td className="py-4 px-4 text-center text-green-600 font-medium">+0.0%</td>
+                    <tr className="border-b border-gray-100 dark:border-gray-700">
+                      <td className="py-4 px-4 text-gray-900 dark:text-gray-200">Receita Total</td>
+                      <td className="py-4 px-4 text-center text-gray-700 dark:text-gray-400">R$ 0</td>
+                      <td className="py-4 px-4 text-center text-gray-700 dark:text-gray-400">R$ {metrics.totalReceitas}</td>
+                      <td className="py-4 px-4 text-center text-green-600 dark:text-green-400 font-medium">+0.0%</td>
                     </tr>
-                    <tr className="border-b border-gray-100">
-                      <td className="py-4 px-4 text-gray-900">Despesas Totais</td>
-                      <td className="py-4 px-4 text-center text-gray-700">R$ 0</td>
-                      <td className="py-4 px-4 text-center text-gray-700">R$ {metrics.totalDespesas}</td>
-                      <td className="py-4 px-4 text-center text-green-600 font-medium">+0.0%</td>
+                    <tr className="border-b border-gray-100 dark:border-gray-700">
+                      <td className="py-4 px-4 text-gray-900 dark:text-gray-200">Despesas Totais</td>
+                      <td className="py-4 px-4 text-center text-gray-700 dark:text-gray-400">R$ 0</td>
+                      <td className="py-4 px-4 text-center text-gray-700 dark:text-gray-400">R$ {metrics.totalDespesas}</td>
+                      <td className="py-4 px-4 text-center text-green-600 dark:text-green-400 font-medium">+0.0%</td>
                     </tr>
-                    <tr className="border-b border-gray-100">
-                      <td className="py-4 px-4 text-gray-900">Lucro Total</td>
-                      <td className="py-4 px-4 text-center text-gray-700">R$ 0</td>
-                      <td className="py-4 px-4 text-center text-gray-700">R$ {metrics.lucroLiquido}</td>
-                      <td className="py-4 px-4 text-center text-green-600 font-medium">+0.0%</td>
+                    <tr className="border-b border-gray-100 dark:border-gray-700">
+                      <td className="py-4 px-4 text-gray-900 dark:text-gray-200">Lucro Total</td>
+                      <td className="py-4 px-4 text-center text-gray-700 dark:text-gray-400">R$ 0</td>
+                      <td className="py-4 px-4 text-center text-gray-700 dark:text-gray-400">R$ {metrics.lucroLiquido}</td>
+                      <td className="py-4 px-4 text-center text-green-600 dark:text-green-400 font-medium">+0.0%</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1195,12 +1250,12 @@ const CompanyHealth: React.FC = () => {
             </div>
 
             {/* Diagnóstico de Pontos de Atenção */}
-            <div className="bg-white rounded-lg shadow-sm p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Diagnóstico de Pontos de Atenção</h2>
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Diagnóstico de Pontos de Atenção</h2>
               
-              {/* Placeholder para diagnóstico */}
-              <div className="h-32 bg-gray-50 rounded-lg flex items-center justify-center">
-                <div className="text-center text-gray-500">
+              <div className="h-32 bg-gray-50 dark:bg-gray-700/50 rounded-lg flex items-center justify-center">
+                <div className="text-center text-gray-500 dark:text-gray-400">
                   <AlertTriangle size={48} className="mx-auto mb-2" />
                   <p>Análise de Pontos Críticos</p>
                 </div>
@@ -1208,25 +1263,26 @@ const CompanyHealth: React.FC = () => {
             </div>
 
             {/* Plano de Ação Estratégico 2026 */}
-            <div className="bg-white rounded-lg shadow-sm p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Plano de Ação Estratégico 2026</h2>
+            {/* ⚠️ CORREÇÃO: Adicionado dark mode */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Plano de Ação Estratégico 2026</h2>
               
               <div className="space-y-6">
-                <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 dark:border-blue-400 rounded-lg p-6">
                   <div className="flex items-start space-x-3">
                     <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-sm font-bold">Q1</span>
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 mb-1">Produtivo</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Produtivo</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <div className="text-sm font-medium text-gray-700 mb-1">Ação</div>
-                          <div className="text-gray-600">Melhorar programa nutricional</div>
+                          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ação</div>
+                          <div className="text-gray-600 dark:text-gray-400">Melhorar programa nutricional</div>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-700 mb-1">Meta</div>
-                          <div className="text-gray-600">Atingir GMD de 1.0 kg/dia</div>
+                          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</div>
+                          <div className="text-gray-600 dark:text-gray-400">Atingir GMD de 1.0 kg/dia</div>
                         </div>
                       </div>
                     </div>
@@ -1235,14 +1291,13 @@ const CompanyHealth: React.FC = () => {
               </div>
             </div>
 
-           
-              <div className="mt-8 p-6 bg-blue-50 rounded-lg">
-                <p className="text-blue-800 font-medium">
-                  O acompanhamento sistemático destes indicadores será fundamental para o sucesso da operação em 2026.
-                </p>
-              </div>
+            
+            <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-blue-800 dark:text-blue-300 font-medium">
+                O acompanhamento sistemático destes indicadores será fundamental para o sucesso da operação em 2026.
+              </p>
             </div>
-          
+          </div>
         )}
       </div>
     </div>

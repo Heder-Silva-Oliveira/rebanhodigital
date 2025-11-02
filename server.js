@@ -59,8 +59,8 @@ if (!MONGODB_URI) {
 }
 
 mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  //useNewUrlParser: true,
+  //useUnifiedTopology: true,
 })
   .then(() => console.log('✅ Conectado ao MongoDB!'))
   .catch(err => {
