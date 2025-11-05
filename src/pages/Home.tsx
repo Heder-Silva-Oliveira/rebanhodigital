@@ -3,6 +3,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {Play, ArrowRight} from 'lucide-react'
+import vacasNoPasto from '../assets/vacas_no_pasto.jpg';
 
 export const Home: React.FC = () => {
   return (
@@ -54,7 +55,7 @@ export const Home: React.FC = () => {
             >
               <div className="bg-[#00995e] rounded-2xl p-6 shadow-2xl">
                 <img
-                  src="\src\img\vacas_no_pasto.jpg"
+                  src={vacasNoPasto}
                   alt="Gado no pasto"
                   className="w-full h-64 lg:h-80 object-cover rounded-xl"
                 />

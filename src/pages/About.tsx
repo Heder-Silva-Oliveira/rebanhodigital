@@ -2,6 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Target, Heart, Shield, Users, Award, TrendingUp } from 'lucide-react'
 
+
 export const About: React.FC = () => {
   const values = [
     {
@@ -38,7 +39,7 @@ export const About: React.FC = () => {
       name: 'Héder Silva',
       role: 'CEO, CTO & Fundador',
       bio: 'Engenheiro de dados especialista em nuvem e automação agropecuária.',
-      image: '/src/img/fakeheder.png'
+      image: '/src/assets/fakeheder.png'
     },
     {
       name: 'Géder Silva',

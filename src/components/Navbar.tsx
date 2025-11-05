@@ -172,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, tog
                             >
                                 <div className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden">
                                     <img 
-                                        src="/src/img/logotipo.png" 
+                                        src= '/src/assets/logotipo.png' 
                                         alt="Logo" 
                                         className="w-10 h-10 object-cover" 
                                     />
