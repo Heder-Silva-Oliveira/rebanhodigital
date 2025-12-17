@@ -1,166 +1,185 @@
-import React, { 
-    useState, 
-    useEffect, 
-    useCallback, 
-    createContext, 
-    useContext, 
-    ReactNode 
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+  ReactNode,
 } from 'react';
+import toast from 'react-hot-toast';
+// ❌ REMOVIDO: import { useNavigate } from 'react-router-dom'; 
 
-// A URL do seu backend
-const EXPRESS_SERVER_URL = import.meta.env.VITE_API_URL; 
+// --- Configuração e Variáveis ---
+const EXPRESS_SERVER_URL = import.meta.env.VITE_API_URL;
+const AUTH_TOKEN_KEY = 'token';
+const AUTH_USER_KEY = 'user';
 
-// --- 1. DEFINIÇÃO DOS TIPOS ---
+// --- Interfaces ---
+
 interface User {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-    // Adicione o tenantId que o backend envia
-    tenantId: string; 
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  tenantId: string;
+  plan: 'basic' | 'pro' | 'enterprise';
+  hasProfileImage: boolean;
+  phone: string;
 }
 
 interface Credentials {
-    email: string;
-    password?: string;
+  email: string;
+  password: string;
 }
 
-// O que o nosso contexto vai fornecer
+type BillingCycle = 'monthly' | 'annual';
+type PlanId = 'basic' | 'pro' | 'enterprise';
+
+interface SignUpPayload {
+  name: string;
+  email: string;
+  password: string;
+  role: 'operador' | 'admin';
+  plan: PlanId; // slugs aceitos pelo backend
+  billingCycle: BillingCycle;
+}
+
 interface AuthContextType {
-    user: User | null;
-    isAuthenticated: boolean;
-    loading: boolean;
-    signIn: (credentials: Credentials) => Promise<User>;
-    signUp: (credentials: any) => Promise<User>;
-    signOut: () => void;
+  user: User | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  signIn: (credentials: Credentials) => Promise<User>;
+  signUp: (payload: SignUpPayload) => Promise<any>; // não faz login
+  signOut: () => void;
 }
 
-// --- 2. CRIAÇÃO DO CONTEXTO ---
-// Este é o "molde" vazio
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// --- 3. CRIAÇÃO DO PROVEDOR (O "CÉREBRO") ---
-// Este componente vai envolver seu App e conter toda a lógica
+// --- Auth Provider ---
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    
-    // --- Toda a sua lógica do useAuth() vem para cá ---
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true); // Começa true
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // ❌ REMOVIDO: const navigate = useNavigate(); 
 
-    // 1. Efeito para carregar sessão do localStorage
-    useEffect(() => {
-        const savedUser = localStorage.getItem('user');
-        const savedToken = localStorage.getItem('token');
-        
-        if (savedUser && savedToken) {
-            try {
-                const userData: User = JSON.parse(savedUser);
-                setUser(userData);
-                setIsAuthenticated(true);
-            } catch (e) {
-                console.error("Erro ao carregar usuário, limpando.");
-                localStorage.removeItem('user');
-                localStorage.removeItem('token');
-            }
-        }
-        setLoading(false);
-    }, []);
+  // Carregar sessão do localStorage
+  useEffect(() => {
+    try {
+      const savedToken = localStorage.getItem(AUTH_TOKEN_KEY);
+      const savedUser = localStorage.getItem(AUTH_USER_KEY);
+      if (savedToken && savedUser) {
+        const userData: User = JSON.parse(savedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        localStorage.removeItem(AUTH_USER_KEY);
+      }
+    } catch {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      localStorage.removeItem(AUTH_USER_KEY);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    // 2. Função de LOGIN
-    const signIn = useCallback(async (credentials: Credentials): Promise<User> => {
-        setLoading(true);
-        try {
-            const response = await fetch(`${EXPRESS_SERVER_URL}/api/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(credentials)
-            });
+  // LOGIN (SignIn)
+  const signIn = useCallback(async (credentials: Credentials): Promise<User> => {
+    setLoading(true);
+    try {
+      // 1. Requisição de login
+      const res = await fetch(`${EXPRESS_SERVER_URL}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Credenciais inválidas.');
-            }
-            
-            const data = await response.json();
-            const userData: User = data.user; 
-            const token = data.token;   
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const err: any = new Error(data?.message || 'Credenciais inválidas.');
+        err.status = res.status;
+        err.data = data;
+        throw err;
+      }
 
-            localStorage.setItem('token', token); 
-            localStorage.setItem('user', JSON.stringify(userData));
-            
-            setUser(userData);
-            setIsAuthenticated(true);
-            
-            return userData; 
-        } catch (error: any) {
-            localStorage.removeItem('user'); 
-            localStorage.removeItem('token');
-            setIsAuthenticated(false);
-            throw error; 
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+      const token: string = data.token;
+      const userData: User = data.user;
 
-    // 3. Função de CADASTRO
-    const signUp = useCallback(async (credentials: any): Promise<User> => {
-        setLoading(true);
-        try {
-            const response = await fetch(`${EXPRESS_SERVER_URL}/api/users`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(credentials)
-            });
+      // 2. Persistir sessão e atualizar estado
+      localStorage.setItem(AUTH_TOKEN_KEY, token);
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
+      setUser(userData);
+      setIsAuthenticated(true);
+      
+      // ❌ REMOVIDO: navigate('/dashboard'); - A navegação agora é feita pelo AuthModal
+      
+      return userData;
+    } catch (error) {
+      // Limpa qualquer resquício de sessão
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      localStorage.removeItem(AUTH_USER_KEY);
+      setIsAuthenticated(false);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []); // navigate REMOVIDO das dependências
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Erro ao cadastrar usuário.');
-            }
-            
-            // Auto-login
-            const loggedInUser = await signIn(credentials); 
-            return loggedInUser;
-        } catch (error) {
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    }, [signIn]); // Dependência de signIn
+  // CADASTRO (não autentica)
+  const signUp = useCallback(async (payload: SignUpPayload): Promise<any> => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${EXPRESS_SERVER_URL}/api/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    // 4. Função de LOGOUT
-    const signOut = useCallback(() => {
-        setUser(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        setLoading(false);
-        // O App.tsx vai re-renderizar e mostrar as PublicRoutes
-    }, []);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const err: any = new Error(data?.message || 'Erro ao cadastrar usuário.');
+        err.status = res.status;
+        err.data = data;
+        throw err;
+      }
 
-    // --- Fim da sua lógica ---
+      // Importante: NÃO fazer login aqui.
+      // O fluxo espera verificação de email antes do login.
+      return data; // opcionalmente retorna { message, ... }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    // O Provedor retorna o Contexto com os valores
-    return (
-        <AuthContext.Provider value={{ 
-            user, 
-            isAuthenticated, 
-            loading, 
-            signIn, 
-            signUp, 
-            signOut 
-        }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  // LOGOUT
+  const signOut = useCallback(() => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
+    // ❌ REMOVIDO: navigate('/'); - A navegação agora é feita pelo componente que chama signOut (Navbar)
+  }, []);
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-// --- 4. CRIAÇÃO DO HOOK (O "CONSUMIDOR") ---
-// Este é o hook que seus componentes vão usar
+// Hook customizado para usar o contexto
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth deve ser usado dentro de um AuthProvider');
-    }
-    return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+  return ctx;
 };
