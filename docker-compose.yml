@@ -1,0 +1,38 @@
+services:
+  # Aplicação AgroGest
+  agrogest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:3002
+    container_name: agrogest-app
+    env_file:
+      - .env
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - VITE_API_URL=http://localhost:3002
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=http://localhost:3002
+      - BACKEND_URL=http://localhost:3002
+      - EMAIL_USERNAME=${EMAIL_USERNAME}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_WHATSAPP_NUMBER=${TWILIO_WHATSAPP_NUMBER}
+    networks:
+      - agrogest-network
+    restart: unless-stopped
+    volumes:
+      - uploads:/app/uploads
+
+volumes:
+  uploads:
+
+networks:
+  agrogest-network:
+    driver: bridge
