@@ -39,7 +39,7 @@ const ForgotPasswordForm: React.FC<{
         try {
             // ⚠️ Rota Mock: No backend, você precisaria criar a rota /api/forgot-password
             // Esta rota deve: 1. Gerar um token de redefinição. 2. Enviar um email com link para o frontend.
-            await api.post('/api/forgot-password', { email: normalizedEmail }); 
+            await api.post('/forgot-password', { email: normalizedEmail }); 
             
             setSuccessMessage(`Um link de redefinição de senha foi enviado para ${normalizedEmail}. Cheque sua caixa de entrada.`);
             // Limpa o erro, caso exista.
@@ -146,33 +146,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     // -----------------------------------------------------------
     const handleLogin = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log('[AUTH MODAL] Iniciando processo de login...');
         setError(null);
         setNeedsVerification(false); 
         
         if (!email || !password) {
+            console.log('[AUTH MODAL] ❌ Campos obrigatórios não preenchidos');
             setError('Por favor, preencha todos os campos.');
             return;
         }
 
+        console.log(`[AUTH MODAL] Tentando login para: ${normalizedEmail}`);
         setIsLoading(true);
         
         try {
             const userData = await signIn({ email: normalizedEmail, password }); 
             
+            console.log('[AUTH MODAL] ✅ Login bem-sucedido, dados do usuário:', userData);
             toast.success(`Bem-vindo de volta, ${userData.name.split(' ')[0]}!`);
+            
+            console.log('[AUTH MODAL] Fechando modal e navegando para dashboard...');
             onClose(); 
             navigate('/dashboard'); 
             
         } catch (err: any) {
+            console.error('[AUTH MODAL] ❌ Erro no login:', err);
             const resData = err.response?.data;
             const status = err.response?.status;
             
             if (status === 403 && resData?.requiresVerification) {
+                console.log('[AUTH MODAL] Email não verificado');
                 setError(resData.message || 'Seu email ainda não foi verificado.');
                 setNeedsVerification(true); 
             } else if (status === 401) {
+                console.log('[AUTH MODAL] Credenciais inválidas');
                 setError('Email ou senha inválidos.');
             } else {
+                console.log('[AUTH MODAL] Erro de rede/servidor');
                 setError('Erro de rede ou servidor.');
             }
         } finally {
@@ -191,7 +201,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         setResendLoading(true);
         
         try {
-            const res = await api.post('/api/resend-verification', { email: normalizedEmail });
+            const res = await api.post('/resend-verification', { email: normalizedEmail });
             
             toast.success(res.data.message || 'Novo link de ativação enviado!');
             

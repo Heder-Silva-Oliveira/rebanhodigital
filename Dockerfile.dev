@@ -1,0 +1,25 @@
+# Dockerfile para desenvolvimento
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Instalar pnpm
+RUN npm install -g pnpm
+
+# Instalar dependências globais úteis para desenvolvimento
+RUN npm install -g nodemon concurrently
+
+# Copiar arquivos de dependências
+COPY package.json pnpm-lock.yaml ./
+
+# Instalar todas as dependências (incluindo dev)
+RUN pnpm install --frozen-lockfile
+
+# Copiar código fonte
+COPY . .
+
+# Expor portas para frontend e backend
+EXPOSE 5173 3002
+
+# Comando para desenvolvimento (executa frontend e backend simultaneamente)
+CMD ["pnpm", "run", "dev:docker"]

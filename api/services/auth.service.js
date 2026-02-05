@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { User } from '../models/User.model.js';
+import { User } from '../user/model/User.model.js';
 import { JWT_SECRET } from '../config/env.js';
 import { sendVerificationEmail, sendPasswordResetEmail } from './email.service.js'; 
 
@@ -88,7 +88,11 @@ export const loginUser = async (emailRaw, password) => {
       plan: user.plan,
     },
     JWT_SECRET,
-    { expiresIn: '1h' }
+    { 
+      expiresIn: '1h',
+      issuer: 'agrogest-api',
+      audience: 'agrogest-client'
+    }
   );
 
   user.lastLogin = new Date();

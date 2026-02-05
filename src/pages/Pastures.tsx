@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react'
-import {Plus, MapPin, Users, Calendar, AlertTriangle, CheckCircle} from 'lucide-react'
+import {Plus, MapPin, Users, Calendar, AlertTriangle, TrendingUp, CheckCircle} from 'lucide-react'
 import { useCRUD } from '../hooks/useCRUD'
 import { format, addDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -23,8 +23,14 @@ interface Pasture {
   createdAt: string
   updatedAt: string
 }
-
+interface Animal {
+  id: string;
+  identificadorDoAnimal: string;
+  pesoAtual: number;
+  identificadorDaPastagem: string; 
+}
 const Pastures: React.FC = () => {
+  const { data: animais } = useCRUD<Animal>({ entityName: 'animals' });
   const { data: pastures, loading, createRecord, updateRecord, deleteRecord } = useCRUD<Pasture>({
     entityName: 'pastures'
   })
@@ -67,6 +73,11 @@ const Pastures: React.FC = () => {
     const occupiedPastures = pastures.filter(p => p.status === 'ocupado').length
     const restingPastures = pastures.filter(p => p.status === 'descanso').length
     const maintenancePastures = pastures.filter(p => p.status === 'manutencao').length
+    const pesoTotalPropriedade = animais.reduce((soma, animal) => soma + (animal.weight || 0), 0);
+    const totalUnidadesAnimais = pesoTotalPropriedade / 450;
+
+    // NOVO: Lotação Média da Fazenda (UA Total / Área Total)
+    const lotacaoMediaHectare = totalArea > 0 ? totalUnidadesAnimais / totalArea : 0;
 
     return {
       totalPastures,
@@ -77,6 +88,8 @@ const Pastures: React.FC = () => {
       occupiedPastures,
       restingPastures,
       maintenancePastures,
+      totalUnidadesAnimais, // Adicionado
+      lotacaoMediaHectare,  // Adicionado
       utilizationRate: totalCapacity > 0 ? (totalAnimals / totalCapacity) * 100 : 0
     }
   }, [pastures])
@@ -279,15 +292,22 @@ const Pastures: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Taxa de Utilização</h3>
-                <p className="text-3xl font-bold text-orange-600 mt-2">{stats.utilizationRate.toFixed(1)}%</p>
-              </div>
-              <CheckCircle className="text-orange-600" size={24} />
-            </div>
+          {/* Card 2: CARGA ANIMAL CONSOLIDADA (UA + TAXA NO MESMO CARD) */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-600">
+          <div className="flex justify-between items-start text-gray-400 mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider">Carga Animal</span>
+            <TrendingUp size={18} className="text-blue-500" />
           </div>
+          <p className="text-2xl font-bold text-blue-700">
+            {stats.totalUnidadesAnimais.toFixed(1)} <span className="text-sm font-normal text-gray-400">UA</span>
+          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm font-bold text-gray-700">
+              {stats.lotacaoMediaHectare.toFixed(2)} UA/ha
+            </span>
+            <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 rounded uppercase font-black">Média</span>
+          </div>
+        </div>
         </div>
 
         {/* Status Summary */}

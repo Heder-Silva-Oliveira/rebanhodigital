@@ -4,7 +4,7 @@ import {
   TWILIO_AUTH_TOKEN,
   TWILIO_WHATSAPP_NUMBER
 } from '../config/env.js';
-import { User } from '../models/User.model.js';
+import { User } from '../user/model/User.model.js';
 
 const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 

@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useCRUD } from '../hooks/useCRUD'
-import {Calendar, Clock, CheckCircle, AlertCircle, Plus, Edit, Trash2, Filter, Loader2} from 'lucide-react'
+import {Calendar, Clock, CheckCircle, AlertCircle, Plus, Edit, Trash2, Filter, Loader2, Check} from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 
@@ -20,6 +20,7 @@ interface PlanningItem {
  estimatedCost: number
  actualCost: number
  completionPercentage: number
+ completedAt?: string // Nova data de conclusão (opcional)
  notes: string
 }
 
@@ -32,8 +33,22 @@ const Planning: React.FC = () => {
       entityName: 'planning',
       sortBy: { startDate: 1 }
   }), []); // Array de dependências vazio: o objeto NUNCA muda.
+
+  // Verificar se há token válido
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
     
-   const { data: plans, loading, createRecord, updateRecord, deleteRecord } = useCRUD<PlanningItem>(crudOptions)
+    console.log('[Planning] Token:', token ? `${token.substring(0, 50)}...` : 'Não encontrado');
+    console.log('[Planning] User:', user ? JSON.parse(user) : 'Não encontrado');
+    
+    if (!token || !user) {
+      console.warn('[Planning] Token ou usuário não encontrado, redirecionando...');
+      // Pode redirecionar para login se necessário
+    }
+  }, []);
+    
+   const { data: plans, loading, createRecord, updateRecord, deleteRecord, reload } = useCRUD<PlanningItem>(crudOptions)
 
    const [showForm, setShowForm] = useState(false)
    const [editingPlan, setEditingPlan] = useState<PlanningItem | null>(null)
@@ -60,12 +75,18 @@ const Planning: React.FC = () => {
    // CORREÇÃO B: Encapsular Estatísticas
    const stats = useMemo(() => {
         const today = new Date();
+        today.setHours(0, 0, 0, 0); // Remove as horas para comparar apenas as datas
+        
         const totalPlans = plans.length
         const activePlans = plans.filter(plan => plan.status === 'em_andamento').length
         const completedPlans = plans.filter(plan => plan.status === 'concluido').length
         const overduePlans = plans.filter(plan => {
-            // Cria new Date() APENAS DENTRO do useMemo, quando 'plans' muda
-            return plan.status !== 'concluido' && new Date(plan.endDate) < today
+            if (plan.status === 'concluido') return false;
+            
+            const endDate = new Date(plan.endDate);
+            endDate.setHours(0, 0, 0, 0); // Remove as horas para comparar apenas as datas
+            
+            return endDate < today;
         }).length
         
         return { totalPlans, activePlans, completedPlans, overduePlans };
@@ -74,41 +95,101 @@ const Planning: React.FC = () => {
    // Desestruturando o stats para usar no JSX
     const { totalPlans, activePlans, completedPlans, overduePlans } = stats;
 
+   // Nova função para marcar como concluído
+   const handleMarkAsCompleted = async (plan: PlanningItem) => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${API_URL}/api/planning/${plan.id}/complete`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao marcar como concluído');
+      }
+
+      // Recarrega os dados para refletir a mudança
+      await reload();
+      
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('pt-BR');
+      const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      
+      toast.success(`Planejamento concluído em ${dateStr} às ${timeStr}!`);
+    } catch (error) {
+      toast.error('Erro ao marcar como concluído');
+      console.error('Erro:', error);
+    }
+   };
 
    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     
+    // Validação básica
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const type = formData.get('type') as string;
+    const startDate = formData.get('startDate') as string;
+    const endDate = formData.get('endDate') as string;
+    const assignedTo = formData.get('assignedTo') as string;
+    const estimatedCost = formData.get('estimatedCost') as string;
+
+    if (!title || !description || !type || !startDate || !endDate || !assignedTo || !estimatedCost) {
+      toast.error('Por favor, preencha todos os campos obrigatórios');
+      return;
+    }
+
+    if (new Date(startDate) >= new Date(endDate)) {
+      toast.error('A data de término deve ser posterior à data de início');
+      return;
+    }
+
+    if (Number(estimatedCost) < 0) {
+      toast.error('O custo estimado deve ser um valor positivo');
+      return;
+    }
+    
     const baseData: PlanningData = {
      planId: (formData.get('planId') as string) || `PLAN${Date.now().toString().slice(-6)}`,
-     title: formData.get('title') as string,
-     description: formData.get('description') as string,
-     type: formData.get('type') as string,
-     startDate: new Date(formData.get('startDate') as string).toISOString(),
-     endDate: new Date(formData.get('endDate') as string).toISOString(),
+     title,
+     description,
+     type,
+     startDate: new Date(startDate).toISOString(),
+     endDate: new Date(endDate).toISOString(),
      status: formData.get('status') as string,
      priority: formData.get('priority') as string,
-     assignedTo: formData.get('assignedTo') as string,
+     assignedTo,
      relatedAnimals: (formData.get('relatedAnimals') as string)?.split(',').map(id => id.trim()).filter(id => id) || [],
      relatedPastures: (formData.get('relatedPastures') as string)?.split(',').map(id => id.trim()).filter(id => id) || [],
-     estimatedCost: Number(formData.get('estimatedCost')),
+     estimatedCost: Number(estimatedCost),
      actualCost: Number(formData.get('actualCost')) || 0,
-     completionPercentage: Number(formData.get('completionPercentage')) || 0,
-     notes: formData.get('notes') as string,
+     completionPercentage: Math.min(100, Math.max(0, Number(formData.get('completionPercentage')) || 0)),
+     notes: (formData.get('notes') as string) || '',
     }
+
+    console.log('Dados do formulário:', baseData);
 
     try {
      if (editingPlan) {
+      console.log('Atualizando planejamento:', editingPlan.id);
       await updateRecord(editingPlan.id, baseData) 
       toast.success('Planejamento atualizado com sucesso!')
      } else {
+      console.log('Criando novo planejamento');
       await createRecord(baseData)
       toast.success('Planejamento criado com sucesso!')
      }
      setShowForm(false)
      setEditingPlan(null)
     } catch (error) {
-     toast.error('Erro ao salvar planejamento')
+     console.error('Erro detalhado ao salvar:', error)
+     toast.error(`Erro ao salvar planejamento: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     }
    }
 
@@ -149,9 +230,18 @@ const Planning: React.FC = () => {
     }
    }
 
-    // Simplificado, pois a lógica de data já foi encapsulada no useMemo
+    // Corrigido: comparação correta de datas
    const isOverdue = (endDate: string, status: string) => {
-    return status !== 'concluido' && new Date(endDate) < new Date()
+    if (status === 'concluido') return false;
+    
+    const today = new Date();
+    const end = new Date(endDate);
+    
+    // Remove as horas para comparar apenas as datas
+    today.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    
+    return end < today;
    }
 
 
@@ -194,6 +284,39 @@ const Planning: React.FC = () => {
                                     Calendário
                                 </button>
                             </div>
+                            <button
+                                onClick={async () => {
+                                    console.log('🧪 Testando API diretamente...');
+                                    const token = localStorage.getItem('token');
+                                    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
+                                    
+                                    try {
+                                        const response = await fetch(`${API_URL}/api/planning`, {
+                                            headers: {
+                                                'Authorization': `Bearer ${token}`,
+                                                'Content-Type': 'application/json'
+                                            }
+                                        });
+                                        
+                                        console.log('Status:', response.status);
+                                        if (response.ok) {
+                                            const data = await response.json();
+                                            console.log('✅ API funcionando!', data.length, 'planejamentos');
+                                            toast.success(`API OK! ${data.length} planejamentos encontrados`);
+                                        } else {
+                                            const error = await response.text();
+                                            console.error('❌ Erro na API:', error);
+                                            toast.error(`Erro na API: ${response.status}`);
+                                        }
+                                    } catch (err) {
+                                        console.error('❌ Erro de rede:', err);
+                                        toast.error('Erro de rede');
+                                    }
+                                }}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                            >
+                                🧪 Testar API
+                            </button>
                             <button
                                 onClick={() => { setEditingPlan(null); setShowForm(true) }}
                                 className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center"
@@ -348,6 +471,12 @@ const Planning: React.FC = () => {
                                             </div>
                                         </div>
                                         
+                                        {plan.completedAt && (
+                                            <div className="mt-2 text-sm text-green-600">
+                                                <span className="font-medium">✓ Concluído em:</span> {new Date(plan.completedAt).toLocaleDateString('pt-BR')} às {new Date(plan.completedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        )}
+                                        
                                         {plan.completionPercentage > 0 && (
                                             <div className="mt-4">
                                                 <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
@@ -376,15 +505,26 @@ const Planning: React.FC = () => {
                                     </div>
                                     
                                     <div className="flex space-x-2 ml-4">
+                                        {plan.status !== 'concluido' && (
+                                            <button
+                                                onClick={() => handleMarkAsCompleted(plan)}
+                                                className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors"
+                                                title="Marcar como Concluído"
+                                            >
+                                                <Check size={16} />
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => handleEdit(plan)}
                                             className="p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded-lg transition-colors"
+                                            title="Editar"
                                         >
                                             <Edit size={16} />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(plan.id, plan.title)}
                                             className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Excluir"
                                         >
                                             <Trash2 size={16} />
                                         </button>

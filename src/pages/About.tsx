@@ -1,6 +1,8 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Target, Heart, Shield, Users, Award, TrendingUp } from 'lucide-react'
+import FakeHeder from '@/assets/fakeheder.png'
+import FakeGeder from '@/assets/fakegeder.jpg'
 
 
 export const About: React.FC = () => {
@@ -39,13 +41,13 @@ export const About: React.FC = () => {
       name: 'Héder Silva',
       role: 'CEO, CTO & Fundador',
       bio: 'Engenheiro de dados especialista em nuvem e automação agropecuária.',
-      image: '/src/assets/fakeheder.png'
+      image: FakeHeder
     },
     {
       name: 'Géder Silva',
       role: 'Head de Produto & Co-Fundador',
       bio: 'Zootecnista e especialista em gestão de propriedades rurais.',
-      image: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg'
+      image: FakeGeder
     }
   ]
 

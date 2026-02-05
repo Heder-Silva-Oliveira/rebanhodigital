@@ -8,5 +8,6 @@ router.use(authenticateToken);
 
 router.get('/', pastureController.list);
 router.post('/', pastureController.create);
+router.patch('/:id', pastureController.update);
 
 export default router;

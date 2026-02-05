@@ -9,7 +9,16 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start-backend": "node --require dotenv/config server.js"
+    "start-backend": "node --require dotenv/config api/server.js",
+    "dev:docker": "concurrently \"vite --host 0.0.0.0\" \"nodemon api/server.js\"",
+    "docker:build": "docker build -t agrogest:latest .",
+    "docker:run": "docker run -p 3002:3002 agrogest:latest",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:dev-down": "docker-compose -f docker-compose.dev.yml down",
+    "docker:logs": "docker-compose logs -f agrogest",
+    "docker:clean": "docker system prune -a"
   },
   "dependencies": {
     "@lumi.new/sdk": "0.1.10",

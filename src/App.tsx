@@ -31,6 +31,7 @@ import Planning from './pages/Planning'
 import Notifications from './pages/Notifications'
 import CompanyHealth from './pages/CompanyHealth'
 import Estimativa from './pages/Estimativa'
+import Formula from './pages/formula'
 import SignUpPage from './pages/SignUpPage'
 import ProfilePage from './pages/Profile'
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -60,12 +61,23 @@ const AuthEventListener: React.FC = () => {
 
   useEffect(() => {
     const handleLogout = () => {
-      clearAuth()
-      navigate('/', { replace: true })
+      console.error('[AUTH EVENT LISTENER] 🚨 EVENTO DE LOGOUT DISPARADO!');
+      console.error('[AUTH EVENT LISTENER] Stack trace do logout:', new Error().stack);
+      console.error('[AUTH EVENT LISTENER] Localização atual:', window.location.href);
+      console.error('[AUTH EVENT LISTENER] Timestamp:', new Date().toISOString());
+      
+      clearAuth();
+      console.log('[AUTH EVENT LISTENER] 🔄 Navegando para home...');
+      navigate('/', { replace: true });
     }
 
-    window.addEventListener('auth:logout', handleLogout)
-    return () => window.removeEventListener('auth:logout', handleLogout)
+    console.log('[AUTH EVENT LISTENER] 📝 Registrando listener de logout');
+    window.addEventListener('auth:logout', handleLogout);
+    
+    return () => {
+      console.log('[AUTH EVENT LISTENER] 🗑️ Removendo listener de logout');
+      window.removeEventListener('auth:logout', handleLogout);
+    }
   }, [navigate])
 
   return null
@@ -103,6 +115,7 @@ const AppContent: React.FC = () => {
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
           <Route path="/company-health" element={<ProtectedRoute><CompanyHealth /></ProtectedRoute>} />
           <Route path="/estimativa" element={<ProtectedRoute><Estimativa /></ProtectedRoute>} />
+          <Route path="/formulacao" element={<ProtectedRoute><Formula /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           
 

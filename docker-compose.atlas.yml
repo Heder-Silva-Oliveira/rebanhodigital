@@ -1,0 +1,36 @@
+services:
+  # Aplicação AgroGest (usando MongoDB Atlas)
+  agrogest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agrogest-app
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - VITE_API_URL=http://localhost:3002
+      - MONGODB_URI=mongodb+srv://hedersilva2_db_user:DJamODUS0856S36h@cluster0.2bv5xhd.mongodb.net/db_rebanho_digital?retryWrites=true&w=majority
+      - JWT_SECRET=MEU_SEGREDO_DOCKER_MUITO_SEGURO_123456
+      - FRONTEND_URL=http://localhost:3002
+      - BACKEND_URL=http://localhost:3002
+      # Email (configurações básicas para evitar erros)
+      - EMAIL_USERNAME=rebanhodigital@gmail.com
+      - EMAIL_PASSWORD=vogu xemu oyfs jznb
+      # WhatsApp/Twilio (opcional - descomente se quiser usar)
+      # - TWILIO_ACCOUNT_SID=seu_account_sid
+      # - TWILIO_AUTH_TOKEN=seu_auth_token
+      # - TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+    networks:
+      - agrogest-network
+    restart: unless-stopped
+    volumes:
+      - uploads:/app/uploads
+
+volumes:
+  uploads:
+
+networks:
+  agrogest-network:
+    driver: bridge

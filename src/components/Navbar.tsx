@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Sun, Moon, User, LogOut, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import Logo from '@/assets/logotipo.png'
 
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
@@ -144,7 +145,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, toggleDark
 
   return (
     <>
-      {isAuthenticated && <ContinuousTicker />}
+      {/* {isAuthenticated && <ContinuousTicker />} */}
 
       <nav className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
         <div className="max-w-screen-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -156,7 +157,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isDarkMode, toggleDark
                 className="flex items-center space-x-3 transition-opacity hover:opacity-80"
               >
                 <div className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                  <img src="/src/assets/logotipo.png" alt="Logo" className="w-10 h-10 object-cover" />
+                  <img src={Logo} alt="Logo" className="h-12 w-auto object-contain" />
                 </div>
                 <div className="hidden sm:block">
                   <h1 className="text-xl font-bold text-gray-900 dark:text-white">Rebanho Digital</h1>

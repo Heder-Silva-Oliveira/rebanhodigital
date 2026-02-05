@@ -32,6 +32,7 @@ const ALL_SIDEBAR_ITEMS = [
   { name: 'Planejamento', href: '/planning', icon: Calendar, feature: null },
   { name: 'Notificações', href: '/notifications', icon: Bell, feature: null },
   { name: 'Estimativa', href: '/estimativa', icon: Calculator, feature: null},
+  { name: 'Formulação', href: '/formulacao', icon: Scale, feature: null },
   // 2. Marcamos este item como uma "feature"
   { name: 'Saúde da Empresa', href: '/company-health', icon: Heart, feature: 'companyHealth' }
 ]

@@ -33,15 +33,22 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    console.log(`[LOGIN CONTROLLER] Tentativa de login para: ${email}`);
+    
     if (!email || !password) {
+        console.log('[LOGIN CONTROLLER] ❌ Email ou senha ausentes');
         return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
     }
 
     const result = await authService.loginUser(email, password);
     
+    console.log(`[LOGIN CONTROLLER] ✅ Login bem-sucedido para: ${email}`);
+    console.log(`[LOGIN CONTROLLER] Token gerado: ${result.token ? 'Sim' : 'Não'}`);
+    console.log(`[LOGIN CONTROLLER] Dados do usuário: ${JSON.stringify(result.user, null, 2)}`);
+    
     res.status(200).json(result);
   } catch (error) {
-    console.error('❌ Erro Login:', error);
+    console.error(`[LOGIN CONTROLLER] ❌ Erro Login para ${req.body.email}:`, error.message);
     res.status(error.status || 500).json({ 
         message: error.message || 'Erro interno do servidor.',
         requiresVerification: error.requiresVerification || false

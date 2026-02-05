@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
     TrendingUp, TrendingDown, AlertTriangle, Calendar, DollarSign,
     Calculator, BarChart3, Shield, Target, MapPin, Loader2
@@ -31,18 +32,39 @@ interface WeighingRecord {
     purpose: string;
     created_at: string;
 }
+
+interface Notification {
+    _id: string;
+    title: string;
+    message: string;
+    type: string;
+    category: string;
+    priority: string;
+    status: string;
+    actionRequired: boolean;
+    actionUrl: string;
+    relatedEntity: string;
+    relatedEntityId: string;
+    createdAt: string;
+    metadata: any;
+}
 // ----------------------------------------------------------------------
 
 
 const Dashboard: React.FC = () => {
+    const navigate = useNavigate();
+    
     // 1. CHAMA MÚLTIPLOS HOOKS PARA TODAS AS ENTIDADES
     const { data: animals, loading: loadingAnimals } = useCRUD<Animal>('animals');
     const { data: transactions, loading: loadingFinance } = useCRUD<FinancialTransaction>('financial_transactions');
     const { data: plans, loading: loadingPlans } = useCRUD<PlanningItem>('planning');
     const { data: pastures, loading: loadingPastures } = useCRUD<Pasture>('pastures');
     const { data: weighings } = useCRUD<WeighingRecord>('weighing_records');
+    // const { data: notifications, loading: loadingNotifications } = useCRUD<Notification>('notifications');
+    const notifications: Notification[] = []; // Temporariamente desabilitado para evitar loop
+    const loadingNotifications = false;
 
-    const isLoading = loadingAnimals || loadingFinance || loadingPlans || loadingPastures;
+    const isLoading = loadingAnimals || loadingFinance || loadingPlans || loadingPastures; // Removido loadingNotifications
 
     // 2. CÁLCULO DE TODOS OS INDICADORES (MEMOIZADO)
     // CompanyHealth.tsx
@@ -215,20 +237,43 @@ const Dashboard: React.FC = () => {
         }
     ];
 
-    const alertas = [
+    // Filtrar e ordenar notificações para alertas do dashboard (não lidas e de alta prioridade)
+    const dashboardAlerts = notifications
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) // Ordenar por data
+        .filter(n => n.status === 'nao_lida' && (n.priority === 'alta' || n.priority === 'critica' || n.actionRequired))
+        .slice(0, 4); // Máximo 4 alertas no dashboard
+
+    const alertas = dashboardAlerts.length > 0 ? dashboardAlerts.map(notification => ({
+        id: notification._id,
+        tipo: notification.title,
+        descricao: notification.message,
+        cor: notification.priority === 'critica' ? 'border-l-red-500 bg-red-50 dark:bg-red-900/20' : 
+             notification.priority === 'alta' ? 'border-l-orange-500 bg-orange-50 dark:bg-orange-900/20' : 
+             'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/20',
+        icone: notification.type === 'urgente' ? <AlertTriangle className="text-red-500" size={20} /> :
+               notification.category === 'saude_animal' ? <Shield className="text-blue-500" size={20} /> :
+               notification.category === 'planejamento' ? <Target className="text-orange-500" size={20} /> :
+               notification.category === 'financeiro' ? <DollarSign className="text-green-500" size={20} /> :
+               <MapPin className="text-purple-500" size={20} />,
+        actionUrl: notification.actionUrl || '/notifications',
+        notification // Dados completos da notificação
+    })) : [
+        // Alertas padrão caso não haja notificações
         {
             id: 1,
             tipo: 'Animais Prontos para Venda',
             descricao: `${metrics.prontosParaVenda} animais atingiram peso ideal (450kgs)`,
-            cor: metrics.prontosParaVenda > 0 ? 'border-l-red-500 bg-red-50' : 'border-l-green-500 bg-green-50',
-            icone: <Target className="text-red-500" size={20} />
+            cor: metrics.prontosParaVenda > 0 ? 'border-l-red-500 bg-red-50 dark:bg-red-900/20' : 'border-l-green-500 bg-green-50 dark:bg-green-900/20',
+            icone: <Target className="text-red-500" size={20} />,
+            actionUrl: '/animals'
         },
         {
             id: 2,
             tipo: 'Taxa de Lotação',
             descricao: `Lotação atual: ${metrics.taxaLotacao.toFixed(2)} UA/ha`,
-            cor: metrics.taxaLotacao > 1.5 ? 'border-l-red-500 bg-red-50' : 'border-l-yellow-500 bg-yellow-50',
-            icone: <MapPin className="text-yellow-500" size={20} />
+            cor: metrics.taxaLotacao > 1.5 ? 'border-l-red-500 bg-red-50 dark:bg-red-900/20' : 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/20',
+            icone: <MapPin className="text-yellow-500" size={20} />,
+            actionUrl: '/pastures'
         },
         {
             id: 3,
@@ -236,17 +281,29 @@ const Dashboard: React.FC = () => {
             descricao: metrics.proximaVacina
                 ? `Vencimento em ${format(new Date(metrics.proximaVacina.endDate), 'dd/MM')}`
                 : 'Nenhuma vacinação planejada',
-            cor: metrics.proximaVacina ? 'border-l-blue-500 bg-blue-50' : 'border-l-gray-500 bg-gray-50',
-            icone: <Shield className="text-blue-500" size={20} />
+            cor: metrics.proximaVacina ? 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-l-gray-500 bg-gray-50 dark:bg-gray-700',
+            icone: <Shield className="text-blue-500" size={20} />,
+            actionUrl: '/planning'
         },
         {
             id: 4,
             tipo: 'Atividades Atrasadas',
             descricao: `${metrics.overduePlans} planos com prazo final expirado.`,
-            cor: metrics.overduePlans > 0 ? 'border-l-red-500 bg-red-50' : 'border-l-green-500 bg-green-50',
-            icone: <AlertTriangle className="text-red-500" size={20} />
+            cor: metrics.overduePlans > 0 ? 'border-l-red-500 bg-red-50 dark:bg-red-900/20' : 'border-l-green-500 bg-green-50 dark:bg-green-900/20',
+            icone: <AlertTriangle className="text-red-500" size={20} />,
+            actionUrl: '/planning'
         }
     ];
+
+    const handleAlertClick = (alerta: any) => {
+        if (alerta.notification) {
+            // Se é uma notificação real, navegar para notificações
+            navigate('/notifications');
+        } else {
+            // Se é um alerta padrão, navegar para a página específica
+            navigate(alerta.actionUrl);
+        }
+    };
 
     const formatValue = (value: number, formatType: string) => {
         if (formatType === 'currency') {
@@ -301,13 +358,21 @@ const Dashboard: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {alertas.map((alerta) => (
-                            <div key={alerta.id} className={`bg-white rounded-lg border-l-4 ${alerta.cor} p-4 shadow-sm`}>
+                            <div 
+                                key={alerta.id} 
+                                className={`bg-white dark:bg-gray-800 rounded-lg border-l-4 ${alerta.cor} p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
+                                onClick={() => handleAlertClick(alerta)}
+                            >
                                 <div className="flex items-start justify-between mb-2">
                                     {alerta.icone}
                                 </div>
-                                <h3 className="font-semibold text-gray-900 text-sm mb-1">{alerta.tipo}</h3>
-                                <p className="text-xs text-gray-600 leading-relaxed">{alerta.descricao}</p>
-                                {/* Removendo o alerta.receita hardcoded */}
+                                <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">{alerta.tipo}</h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{alerta.descricao}</p>
+                                {alerta.notification && (
+                                    <div className="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                        Clique para ver detalhes →
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

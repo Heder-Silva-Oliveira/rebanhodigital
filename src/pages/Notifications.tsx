@@ -26,10 +26,14 @@ interface Notification {
 }
 
 const Notifications: React.FC = () => {
-  const { data: notifications, loading, updateRecord, deleteRecord } = useCRUD<Notification>({
-    entityName: 'notifications',
-    sortBy: { createdAt: -1 }
-  })
+  // Temporariamente desabilitado para evitar loop
+  const notifications: Notification[] = []
+  const loading = false
+  
+  // const { data: notifications, loading, updateRecord, deleteRecord } = useCRUD<Notification>({
+  //   entityName: 'notifications',
+  //   sortBy: { createdAt: -1 }
+  // })
 
   const [filterType, setFilterType] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
@@ -57,57 +61,35 @@ const Notifications: React.FC = () => {
   const actionRequiredNotifications = notifications.filter(n => n.actionRequired && n.status === 'nao_lida').length
 
   const markAsRead = async (notification: Notification) => {
-    if (notification.status === 'nao_lida') {
-      try {
-        await updateRecord(notification._id, {
-          status: 'lida',
-          readAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        })
-        toast.success('Notificação marcada como lida')
-      } catch (error) {
-        toast.error('Erro ao marcar como lida')
-      }
-    }
+    // Temporariamente desabilitado
+    console.log('markAsRead desabilitado temporariamente')
+    // if (notification.status === 'nao_lida') {
+    //   try {
+    //     await updateRecord(notification._id, {
+    //       status: 'lida',
+    //       readAt: new Date().toISOString(),
+    //       updatedAt: new Date().toISOString()
+    //     })
+    //     toast.success('Notificação marcada como lida')
+    //   } catch (error) {
+    //     toast.error('Erro ao marcar como lida')
+    //   }
+    // }
   }
 
   const markAsUnread = async (notification: Notification) => {
-    if (notification.status === 'lida') {
-      try {
-        await updateRecord(notification._id, {
-          status: 'nao_lida',
-          readAt: '',
-          updatedAt: new Date().toISOString()
-        })
-        toast.success('Notificação marcada como não lida')
-      } catch (error) {
-        toast.error('Erro ao marcar como não lida')
-      }
-    }
+    // Temporariamente desabilitado
+    console.log('markAsUnread desabilitado temporariamente')
   }
 
   const resolveNotification = async (notification: Notification) => {
-    try {
-      await updateRecord(notification._id, {
-        status: 'resolvida',
-        resolvedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      })
-      toast.success('Notificação marcada como resolvida')
-    } catch (error) {
-      toast.error('Erro ao resolver notificação')
-    }
+    // Temporariamente desabilitado
+    console.log('resolveNotification desabilitado temporariamente')
   }
 
   const deleteNotification = async (id: string, title: string) => {
-    if (confirm(`Tem certeza que deseja excluir a notificação "${title}"?`)) {
-      try {
-        await deleteRecord(id)
-        toast.success('Notificação excluída com sucesso!')
-      } catch (error) {
-        toast.error('Erro ao excluir notificação')
-      }
-    }
+    // Temporariamente desabilitado
+    console.log('deleteNotification desabilitado temporariamente')
   }
 
   const getTypeIcon = (type: string) => {

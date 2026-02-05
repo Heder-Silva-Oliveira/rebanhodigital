@@ -17,7 +17,10 @@ const getAuthHeaders = () => {
   headers.append('Content-Type', 'application/json');
 
   if (token) {
+    console.log(`[useCRUD] Token encontrado: ${token.substring(0, 50)}...`);
     headers.append('Authorization', `Bearer ${token}`);
+  } else {
+    console.warn('[useCRUD] Nenhum token encontrado no localStorage');
   }
   return headers;
 };
@@ -69,11 +72,26 @@ export function useCRUD<T extends { id?: string } = any>(options: CRUDOptions | 
         
         let finalData: T[] = [];
         if (Array.isArray(result)) {
-            finalData = result as T[];
+            // Mapeia _id para id se necessário
+            finalData = result.map(item => ({
+              ...item,
+              id: item.id || item._id
+            })) as T[];
         } else if (result.animals) { // Caso específico do seu server.js
-            finalData = result.animals as T[];
+            finalData = result.animals.map(item => ({
+              ...item,
+              id: item.id || item._id
+            })) as T[];
         } else if (result && typeof result === 'object' && result[entityName]) {
-            finalData = result[entityName] as T[];
+            finalData = result[entityName].map(item => ({
+              ...item,
+              id: item.id || item._id
+            })) as T[];
+        } else if (result.notifications) { // Para notificações
+            finalData = result.notifications.map(item => ({
+              ...item,
+              id: item.id || item._id
+            })) as T[];
         } else {
              console.warn(`[useCRUD] Formato de resposta inesperado:`, result);
              finalData = [];
@@ -108,12 +126,12 @@ export function useCRUD<T extends { id?: string } = any>(options: CRUDOptions | 
     } finally {
       setLoading(false);
     }
-  }, [entityName, sortBy]); // ✅ REMOVI sortBy das dependências
+  }, [entityName]); // ✅ Removido sortBy das dependências para evitar loops
 
-  // ✅ CORREÇÃO: useEffect com array de dependências VAZIO
+  // ✅ CORREÇÃO: useEffect com loadData como dependência
   useEffect(() => {
     loadData();
-  }, []); // ✅ MUDEI: [] em vez de [loadData]
+  }, [loadData]);
 
   // -----------------------------------------------------------------------
   // 2. Lógica de Criação (CREATE)
@@ -123,6 +141,9 @@ export function useCRUD<T extends { id?: string } = any>(options: CRUDOptions | 
       setError(null);
       const url = `${API_URL}/api/${entityName}`;
       
+      console.log(`[useCRUD] Criando registro em: ${url}`);
+      console.log(`[useCRUD] Dados enviados:`, item);
+      
       // ALTERADO: Adiciona headers ao fetch
       const response = await fetch(url, {
         method: 'POST',
@@ -130,18 +151,23 @@ export function useCRUD<T extends { id?: string } = any>(options: CRUDOptions | 
         body: JSON.stringify(item)
       });
 
+      console.log(`[useCRUD] Resposta do servidor: ${response.status} ${response.statusText}`);
+
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
           handleAuthError();
           return; 
         }
         const errorText = await response.text();
+        console.error(`[useCRUD] Erro na criação:`, errorText);
         throw new Error(`Falha na criação (Status: ${response.status}): ${errorText}`);
       }
 
       const newItem = await response.json() as T;
-      setData(prev => [newItem, ...prev]);
-      return newItem;
+      console.log(`[useCRUD] Item criado:`, newItem);
+      const itemWithId = { ...newItem, id: newItem.id || (newItem as any)._id };
+      setData(prev => [itemWithId, ...prev]);
+      return itemWithId;
       
     } catch (err) {
       console.error(`Erro ao criar ${entityName}:`, err);
@@ -158,6 +184,9 @@ export function useCRUD<T extends { id?: string } = any>(options: CRUDOptions | 
       setError(null);
       const url = `${API_URL}/api/${entityName}/${id}`;
       
+      console.log(`[useCRUD] Atualizando registro em: ${url}`);
+      console.log(`[useCRUD] Dados enviados:`, updates);
+      
       // ALTERADO: Adiciona headers ao fetch
       const response = await fetch(url, {
         method: 'PATCH',
@@ -165,18 +194,23 @@ export function useCRUD<T extends { id?: string } = any>(options: CRUDOptions | 
         body: JSON.stringify(updates)
       });
 
+      console.log(`[useCRUD] Resposta do servidor: ${response.status} ${response.statusText}`);
+
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
           handleAuthError();
           return; 
         }
         const errorText = await response.text();
+        console.error(`[useCRUD] Erro na atualização:`, errorText);
         throw new Error(`Falha na atualização (Status: ${response.status}): ${errorText}`);
       }
 
       const updatedItem = await response.json() as T;
-      setData(prev => prev.map(item => (item as any).id === id ? updatedItem : item));
-      return updatedItem;
+      console.log(`[useCRUD] Item atualizado:`, updatedItem);
+      const itemWithId = { ...updatedItem, id: updatedItem.id || (updatedItem as any)._id };
+      setData(prev => prev.map(item => (item as any).id === id ? itemWithId : item));
+      return itemWithId;
       
     } catch (err) {
       console.error(`Erro ao atualizar ${entityName}:`, err);
@@ -218,14 +252,7 @@ export function useCRUD<T extends { id?: string } = any>(options: CRUDOptions | 
   }, [entityName]);
 
   // -----------------------------------------------------------------------
-  // 5. Efeito para Carregamento Inicial
-  // -----------------------------------------------------------------------
-  useEffect(() => {
-    loadData()
-  }, [loadData])
-
-  // -----------------------------------------------------------------------
-  // 6. Retorno do Hook
+  // 5. Retorno do Hook
   // -----------------------------------------------------------------------
   return {
     data,

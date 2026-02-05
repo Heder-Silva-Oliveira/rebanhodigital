@@ -2,6 +2,11 @@ import { transporter } from '../config/mail.js';
 import { EMAIL_USERNAME, BACKEND_URL, FRONTEND_URL } from '../config/env.js';
 
 export const sendVerificationEmail = async (toEmail, token) => {
+  if (!transporter) {
+    console.warn(`⚠️ Email não configurado. Pulando envio para ${toEmail}`);
+    return;
+  }
+
   const verificationLink = `${BACKEND_URL}/api/verify-email?token=${token}`;
   
   const mailOptions = {
@@ -37,8 +42,12 @@ export const sendVerificationEmail = async (toEmail, token) => {
   }
 };
 
-// ✅ NOVA FUNÇÃO: Envio de Link de Redefinição de Senha
 export const sendPasswordResetEmail = async (toEmail, token) => {
+  if (!transporter) {
+    console.warn(`⚠️ Email não configurado. Pulando envio de redefinição para ${toEmail}`);
+    return;
+  }
+
   // O link agora aponta para o FRONTEND (onde o usuário digita a nova senha)
   const resetLink = `${FRONTEND_URL}/reset-password?token=${token}`; 
   

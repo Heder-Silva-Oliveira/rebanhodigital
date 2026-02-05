@@ -49,7 +49,7 @@ const ResetPasswordPage: React.FC = () => {
 
         try {
             // Chama o endpoint POST /api/reset-password
-            const res = await api.post('/api/reset-password', {
+            const res = await api.post('/reset-password', {
                 token,
                 newPassword,
             });

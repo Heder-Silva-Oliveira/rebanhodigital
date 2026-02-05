@@ -9,7 +9,7 @@ export const Terms: React.FC = () => {
       id: 'aceite',
       title: '1. Aceite dos Termos',
       content: [
-        'Ao acessar e usar a plataforma AgroPec Manager, você concorda em cumprir e estar sujeito aos seguintes termos e condições de uso.',
+        'Ao acessar e usar a plataforma Rebanho Digital, você concorda em cumprir e estar sujeito aos seguintes termos e condições de uso.',
         'Se você não concordar com qualquer parte destes termos, não deverá usar nossos serviços.',
         'Reservamo-nos o direito de alterar estes termos a qualquer momento, sendo sua responsabilidade verificar periodicamente as atualizações.'
       ]
@@ -18,7 +18,7 @@ export const Terms: React.FC = () => {
       id: 'servicos',
       title: '2. Descrição dos Serviços',
       content: [
-        'A AgroPec Manager oferece uma plataforma digital para gestão de propriedades pecuárias, incluindo controle de rebanho, gestão financeira, monitoramento de pastagens e geração de relatórios.',
+        'A Rebanho Digital oferece uma plataforma digital para gestão de propriedades pecuárias, incluindo controle de rebanho, gestão financeira, monitoramento de pastagens e geração de relatórios.',
         'Nossos serviços são fornecidos "como estão" e podem ser modificados, suspensos ou descontinuados a qualquer momento.',
         'Não garantimos que os serviços estarão sempre disponíveis, livres de erros ou que atenderão às suas necessidades específicas.'
       ]
@@ -67,7 +67,7 @@ export const Terms: React.FC = () => {
       id: 'propriedade',
       title: '7. Propriedade Intelectual',
       content: [
-        'Todos os direitos de propriedade intelectual da plataforma pertencem à AgroPec Manager.',
+        'Todos os direitos de propriedade intelectual da plataforma pertencem à Rebanho Digital.',
         'Você recebe uma licença limitada e não exclusiva para usar nossos serviços.',
         'É proibido copiar, modificar, distribuir ou criar obras derivadas de nossos conteúdos.',
         'Respeitamos os direitos de propriedade intelectual de terceiros e esperamos que você faça o mesmo.'
@@ -98,7 +98,7 @@ export const Terms: React.FC = () => {
       title: '10. Disposições Gerais',
       content: [
         'Estes termos são regidos pelas leis brasileiras.',
-        'Qualquer disputa será resolvida nos tribunais de São Paulo, SP.',
+        'Qualquer disputa será resolvida nos tribunais de Londrina, PR.',
         'Se alguma disposição for considerada inválida, as demais permanecerão em vigor.',
         'Estes termos constituem o acordo completo entre as partes.'
       ]
@@ -123,7 +123,7 @@ export const Terms: React.FC = () => {
               Termos de Uso
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Leia atentamente nossos termos e condições de uso da plataforma AgroPec Manager
+              Leia atentamente nossos termos e condições de uso da plataforma Rebanho Digital
             </p>
             <div className="mt-6 text-sm text-gray-500">
               Última atualização: 15 de janeiro de 2024

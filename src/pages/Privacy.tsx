@@ -9,7 +9,7 @@ export const Privacy: React.FC = () => {
       id: 'introducao',
       title: '1. Introdução',
       content: [
-        'A AgroPec Manager está comprometida com a proteção da privacidade e segurança dos dados pessoais de nossos usuários.',
+        'A Rebanho Digital está comprometida com a proteção da privacidade e segurança dos dados pessoais de nossos usuários.',
         'Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais.',
         'Estamos em conformidade com a Lei Geral de Proteção de Dados (LGPD) - Lei nº 13.709/2018 e outras regulamentações aplicáveis.'
       ]
@@ -157,10 +157,10 @@ export const Privacy: React.FC = () => {
               Política de Privacidade
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Seu compromisso com a proteção e privacidade dos seus dados na plataforma AgroPec Manager
+              Seu compromisso com a proteção e privacidade dos seus dados na plataforma Rebanho Digital
             </p>
             <div className="mt-6 text-sm text-gray-500">
-              Última atualização: 15 de janeiro de 2024 | Em conformidade com a LGPD
+              Última atualização: 15 de janeiro de 2026 | Em conformidade com a LGPD
             </div>
           </motion.div>
         </div>

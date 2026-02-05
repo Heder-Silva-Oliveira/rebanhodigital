@@ -1,0 +1,70 @@
+services:
+  # Aplicação AgroGest (Desenvolvimento)
+  agrogest-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: agrogest-dev
+    ports:
+      - "5173:5173"  # Frontend (Vite)
+      - "3002:3002"  # Backend (Express)
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3002
+      - PORT=3002
+      - MONGODB_URI=mongodb://mongo-dev:27017/agrogest_dev
+      - JWT_SECRET=MEU_SEGREDO_DEV_123456
+      - FRONTEND_URL=http://localhost:5173
+      - BACKEND_URL=http://localhost:3002
+    depends_on:
+      - mongo-dev
+    networks:
+      - agrogest-dev-network
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - uploads_dev:/app/uploads
+    restart: unless-stopped
+
+  # MongoDB para desenvolvimento
+  mongo-dev:
+    image: mongo:7.0
+    container_name: agrogest-mongo-dev
+    ports:
+      - "27018:27017"  # Porta diferente para não conflitar
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin123
+      - MONGO_INITDB_DATABASE=agrogest_dev
+    volumes:
+      - mongo_data_dev:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - agrogest-dev-network
+    restart: unless-stopped
+
+  # MongoDB Express para desenvolvimento
+  mongo-express-dev:
+    image: mongo-express:1.0.2
+    container_name: agrogest-mongo-express-dev
+    ports:
+      - "8082:8081"  # Porta diferente para não conflitar
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=admin123
+      - ME_CONFIG_MONGODB_URL=mongodb://admin:admin123@mongo-dev:27017/
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
+    depends_on:
+      - mongo-dev
+    networks:
+      - agrogest-dev-network
+    restart: unless-stopped
+
+volumes:
+  mongo_data_dev:
+  uploads_dev:
+
+networks:
+  agrogest-dev-network:
+    driver: bridge

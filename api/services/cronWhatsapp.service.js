@@ -1,5 +1,5 @@
 import { sendWhatsappMessage } from './whatsapp.service.js';
-import { User } from '../models/User.model.js';
+import { User } from '../user/model/User.model.js';
 
 /**
  * Processa e envia mensagens automáticas

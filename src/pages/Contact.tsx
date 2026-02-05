@@ -31,7 +31,7 @@ export const Contact: React.FC = () => {
     {
       icon: <MapPin className="w-6 h-6 text-green-600" />,
       title: 'Endereço',
-      details: ['Rua das Tecnologias, 123', 'São Paulo - SP, 01234-567'],
+      details: ['Rua das Tecnologias, 123', 'Londrina - PR, 01234-567'],
       subtitle: 'Visite nosso escritório'
     },
     {
@@ -297,7 +297,7 @@ export const Contact: React.FC = () => {
               Nossa Localização
             </h2>
             <p className="text-gray-600">
-              Visite nosso escritório em São Paulo para uma conversa presencial
+              Visite nosso escritório em Londrina para uma conversa presencial
             </p>
           </motion.div>
 
@@ -308,7 +308,7 @@ export const Contact: React.FC = () => {
                 Mapa interativo seria carregado aqui
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                Rua das Tecnologias, 123 - São Paulo, SP
+                Rua das Tecnologias, 123 - Londrina, PR
               </p>
             </div>
           </div>
