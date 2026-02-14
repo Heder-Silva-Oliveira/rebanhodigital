@@ -38,4 +38,4 @@ PlanningSchema.index({ tenantId: 1, startDate: -1 });
 PlanningSchema.index({ tenantId: 1, status: 1 });
 PlanningSchema.index({ tenantId: 1, type: 1 });
 
-export const Planning = mongoose.model('Planning', PlanningSchema);
+export const Planning = mongoose.models.Planning || mongoose.model('Planning', PlanningSchema);

@@ -1,27 +1,94 @@
 // Esta é a "Fonte da Verdade" dos planos para o Frontend
 export const PLAN_LIMITS_FRONTEND = {
-  free: {
-    name: "Basic",
-    animals: 5,
-    pastures: 2,
+  basic: {
+    name: "Básico",
+    price: "R$ 49,90/mês",
+    animals: 50,
+    pastures: 5,
+    weighings: Infinity,
+    recipes: 10,
+    financialTransactions: 50,
+    plannings: 0,
+    users: 1,
     features: {
-      companyHealth: false
+      companyHealth: false,
+      planning: false,
+      advancedReports: false,
+      dataExport: false,
+      whatsappNotifications: false,
+      smsNotifications: false,
+      apiAccess: false,
+      customDashboard: false,
+      multiUser: false,
     }
   },
   pro: {
-    name: "Pro",
+    name: "Profissional",
+    price: "R$ 149,90/mês",
     animals: 500,
     pastures: 50,
+    weighings: Infinity,
+    recipes: 100,
+    financialTransactions: Infinity,
+    plannings: 20,
+    users: 5,
     features: {
-      companyHealth: true
+      companyHealth: true,
+      planning: true,
+      advancedReports: true,
+      dataExport: true,
+      whatsappNotifications: true,
+      smsNotifications: false,
+      apiAccess: false,
+      customDashboard: false,
+      multiUser: true,
     }
   },
   enterprise: {
     name: "Enterprise",
+    price: "Sob consulta",
     animals: Infinity,
     pastures: Infinity,
+    weighings: Infinity,
+    recipes: Infinity,
+    financialTransactions: Infinity,
+    plannings: Infinity,
+    users: Infinity,
     features: {
-      companyHealth: true
+      companyHealth: true,
+      planning: true,
+      advancedReports: true,
+      dataExport: true,
+      whatsappNotifications: true,
+      smsNotifications: true,
+      apiAccess: true,
+      customDashboard: true,
+      prioritySupport: true,
+      aiInsights: true,
+      multiUser: true,
+    }
+  },
+  // Alias para compatibilidade
+  free: {
+    name: "Básico",
+    price: "R$ 49,90/mês",
+    animals: 50,
+    pastures: 5,
+    weighings: Infinity,
+    recipes: 10,
+    financialTransactions: 50,
+    plannings: 0,
+    users: 1,
+    features: {
+      companyHealth: false,
+      planning: false,
+      advancedReports: false,
+      dataExport: false,
+      whatsappNotifications: false,
+      smsNotifications: false,
+      apiAccess: false,
+      customDashboard: false,
+      multiUser: false,
     }
   }
 };

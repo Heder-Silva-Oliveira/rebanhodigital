@@ -21,7 +21,9 @@ router.get('/', (req, res) => {
 });
 
 // API Routes
-router.use('/', authRoutes); // /api/login, /api/users (POST)
+// Auth routes first (specific routes like /login)
+router.use('/', authRoutes); // /api/login, /api/register, etc
+// User management routes (admin only)
 router.use('/users', userRoutes);
 router.use('/animals', animalRoutes);
 router.use('/pastures', pastureRoutes);

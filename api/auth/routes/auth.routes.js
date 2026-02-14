@@ -7,8 +7,8 @@ const router = Router();
 // 2. Rotas de Autenticação
 router.post('/login', authController.login);
 
-// 3. Correção: O frontend chama POST /api/users para criar conta
-router.post('/users', authController.register);
+// 3. Rota de registro público
+router.post('/register', authController.register);
 
 // 4. Rotas de Verificação de Email (Necessárias para o fluxo funcionar)
 router.get('/verify-email', authController.verifyEmail);

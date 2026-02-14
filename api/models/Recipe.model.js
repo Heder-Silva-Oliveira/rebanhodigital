@@ -18,4 +18,4 @@ const EsquemaDeReceita = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-export const Receita = mongoose.model('Receita', EsquemaDeReceita);
+export const Receita = mongoose.models.Receita || mongoose.model('Receita', EsquemaDeReceita);

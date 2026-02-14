@@ -101,4 +101,4 @@ notificationSchema.pre('save', function(next) {
   next();
 });
 
-export const Notification = mongoose.model('Notification', notificationSchema);
+export const Notification = mongoose.models.Notification || mongoose.model('Notification', notificationSchema);

@@ -42,7 +42,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Middlewares de segurança (devem vir antes das rotas) - TEMPORARIAMENTE DESABILITADO
+// Middlewares de segurança (devem vir antes das rotas)
 // app.use(securityMiddleware);
 // app.use(securityLogger);
 

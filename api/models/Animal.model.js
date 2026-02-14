@@ -22,4 +22,4 @@ const AnimalSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-export const Animal = mongoose.model('Animal', AnimalSchema);
+export const Animal = mongoose.models.Animal || mongoose.model('Animal', AnimalSchema);

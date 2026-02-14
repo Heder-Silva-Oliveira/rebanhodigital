@@ -20,4 +20,4 @@ const FinancialSchema = new mongoose.Schema({
   updatedAt: Date
 });
 
-export const Financial = mongoose.model('Financial', FinancialSchema);
+export const Financial = mongoose.models.Financial || mongoose.model('Financial', FinancialSchema);

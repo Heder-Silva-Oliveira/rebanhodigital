@@ -1,7 +1,6 @@
-
 import React from 'react'
 import { motion } from 'framer-motion'
-import {Shield, Lock, Eye, Database, UserCheck, AlertCircle} from 'lucide-react'
+import { Shield, Lock, Eye, Database, UserCheck, AlertCircle } from 'lucide-react'
 
 export const Privacy: React.FC = () => {
   const sections = [
@@ -9,323 +8,168 @@ export const Privacy: React.FC = () => {
       id: 'introducao',
       title: '1. Introdução',
       content: [
-        'A Rebanho Digital está comprometida com a proteção da privacidade e segurança dos dados pessoais de nossos usuários.',
-        'Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais.',
-        'Estamos em conformidade com a Lei Geral de Proteção de Dados (LGPD) - Lei nº 13.709/2018 e outras regulamentações aplicáveis.'
+        'A Rebanho Digital está comprometida com a proteção da privacidade e segurança dos dados pessoais de seus usuários.',
+        'Esta Política de Privacidade descreve de forma clara como coletamos, utilizamos, armazenamos e protegemos os dados pessoais tratados por meio da plataforma.',
+        'O tratamento de dados pessoais é realizado em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 – LGPD) e demais normas aplicáveis.'
+      ]
+    },
+    {
+      id: 'controlador',
+      title: '2. Controlador e Operadores de Dados',
+      content: [
+        'A Rebanho Digital atua como Controladora dos Dados Pessoais tratados na plataforma, sendo responsável pelas decisões referentes ao tratamento desses dados.',
+        'Prestadores de serviços contratados para atividades como hospedagem, processamento de pagamentos, suporte técnico e comunicações atuam como Operadores de Dados.',
+        'Todos os Operadores tratam os dados pessoais estritamente conforme nossas instruções e obrigações contratuais, em conformidade com a LGPD.'
       ]
     },
     {
       id: 'dados-coletados',
-      title: '2. Dados Coletados',
+      title: '3. Dados Coletados',
       content: [
-        'Dados de identificação: nome, email, telefone, CPF/CNPJ quando necessário.',
-        'Dados da propriedade: informações sobre animais, pastagens, transações financeiras e operações.',
-        'Dados de uso: logs de acesso, endereço IP, tipo de dispositivo e navegador.',
-        'Dados de comunicação: mensagens enviadas através de nossos canais de suporte.'
+        'Dados de identificação: nome, endereço de e-mail, telefone e CPF ou CNPJ, quando necessário.',
+        'Dados da propriedade rural: informações sobre rebanho, manejo, pastagens, registros operacionais e financeiros.',
+        'Dados de uso da plataforma: logs de acesso, endereço IP, data e hora de acesso, tipo de dispositivo, navegador e sistema operacional.',
+        'Dados de comunicação: informações fornecidas em contatos realizados por meio de nossos canais de atendimento.'
+      ]
+    },
+    {
+      id: 'dados-economicos',
+      title: '4. Dados de Impacto Econômico',
+      content: [
+        'Alguns dados tratados pela plataforma, embora não classificados como dados sensíveis pela LGPD, possuem caráter estratégico e impacto econômico relevante.',
+        'Esses dados incluem informações financeiras, produtivas e patrimoniais da atividade pecuária.',
+        'Por essa razão, adotamos medidas técnicas e organizacionais reforçadas para garantir a confidencialidade e integridade dessas informações.'
       ]
     },
     {
       id: 'finalidade',
-      title: '3. Finalidade do Tratamento',
+      title: '5. Finalidade do Tratamento',
       content: [
-        'Prestação dos serviços de gestão pecuária através da plataforma.',
-        'Comunicação com usuários sobre atualizações, suporte e questões relacionadas aos serviços.',
-        'Melhoria contínua da plataforma através de análises de uso e feedback.',
-        'Cumprimento de obrigações legais e regulamentares aplicáveis.'
+        'Disponibilizar e operacionalizar as funcionalidades da plataforma de gestão pecuária.',
+        'Permitir o controle, organização e análise de informações inseridas pelo próprio usuário.',
+        'Realizar comunicações relacionadas ao funcionamento da plataforma, suporte técnico e atualizações.',
+        'Cumprir obrigações legais, regulatórias ou determinações de autoridades competentes.'
       ]
     },
     {
       id: 'base-legal',
-      title: '4. Base Legal',
+      title: '6. Base Legal do Tratamento',
       content: [
-        'Execução de contrato: para prestação dos serviços contratados.',
-        'Consentimento: para comunicações de marketing e funcionalidades opcionais.',
-        'Legítimo interesse: para melhoria dos serviços e segurança da plataforma.',
-        'Cumprimento de obrigação legal: quando exigido por lei ou autoridades competentes.'
+        'Execução de contrato, para viabilizar a prestação dos serviços contratados.',
+        'Consentimento do titular, quando exigido, especialmente para comunicações não essenciais.',
+        'Legítimo interesse, para fins de segurança, prevenção a fraudes e melhoria da plataforma.',
+        'Cumprimento de obrigação legal ou regulatória.'
       ]
     },
     {
       id: 'compartilhamento',
-      title: '5. Compartilhamento de Dados',
+      title: '7. Compartilhamento de Dados',
       content: [
-        'Não vendemos, alugamos ou comercializamos seus dados pessoais com terceiros.',
-        'Podemos compartilhar dados com prestadores de serviços essenciais (hospedagem, pagamento, suporte).',
-        'Compartilhamento pode ocorrer quando exigido por lei ou ordem judicial.',
-        'Todos os terceiros são contratualmente obrigados a proteger seus dados.'
+        'A Rebanho Digital não vende, aluga ou comercializa dados pessoais de seus usuários.',
+        'Os dados podem ser compartilhados com prestadores de serviços essenciais à operação da plataforma.',
+        'O compartilhamento também poderá ocorrer para cumprimento de obrigações legais ou ordens judiciais.',
+        'Todos os terceiros envolvidos estão contratualmente obrigados a adotar medidas adequadas de proteção de dados.'
+      ]
+    },
+    {
+      id: 'transferencia',
+      title: '8. Transferência Internacional de Dados',
+      content: [
+        'Os dados pessoais poderão ser armazenados ou processados em servidores localizados fora do território brasileiro.',
+        'Nessas hipóteses, a Rebanho Digital assegura que a transferência ocorrerá em conformidade com a LGPD.',
+        'Serão adotadas garantias adequadas de proteção, observando padrões de segurança e confidencialidade compatíveis com a legislação brasileira.'
       ]
     },
     {
       id: 'seguranca',
-      title: '6. Segurança dos Dados',
+      title: '9. Segurança dos Dados',
       content: [
-        'Utilizamos criptografia SSL/TLS para proteger dados em trânsito.',
-        'Dados são armazenados em servidores seguros com controle de acesso restrito.',
-        'Realizamos backups regulares e testes de segurança.',
-        'Equipe treinada em boas práticas de segurança da informação.'
+        'Utilizamos criptografia e protocolos de segurança para proteção dos dados em trânsito.',
+        'Os dados são armazenados em ambientes controlados, com acesso restrito e monitorado.',
+        'Realizamos rotinas de backup e medidas preventivas contra acessos não autorizados.',
+        'Nossa equipe é treinada em boas práticas de segurança da informação e proteção de dados.'
       ]
     },
     {
       id: 'retencao',
-      title: '7. Retenção de Dados',
+      title: '10. Retenção de Dados',
       content: [
-        'Dados são mantidos apenas pelo tempo necessário para cumprir as finalidades descritas.',
-        'Dados de conta ativa são mantidos enquanto o serviço estiver sendo utilizado.',
-        'Após cancelamento, dados podem ser mantidos por período adicional para fins legais.',
-        'Dados podem ser anonimizados para análises estatísticas e melhorias do serviço.'
+        'Os dados pessoais são mantidos apenas pelo tempo necessário para o cumprimento das finalidades descritas nesta política.',
+        'Enquanto a conta estiver ativa, os dados permanecerão disponíveis ao usuário.',
+        'Após o encerramento da conta, os dados poderão ser mantidos pelo período exigido por obrigações legais ou regulatórias.',
+        'Sempre que possível, os dados poderão ser anonimizados para fins estatísticos e de melhoria da plataforma.'
       ]
     },
     {
       id: 'direitos',
-      title: '8. Seus Direitos',
+      title: '11. Direitos do Titular',
       content: [
-        'Acesso: solicitar informações sobre o tratamento de seus dados.',
-        'Correção: solicitar correção de dados incompletos, inexatos ou desatualizados.',
-        'Exclusão: solicitar eliminação de dados desnecessários ou tratados inadequadamente.',
-        'Portabilidade: solicitar transferência de dados para outro prestador de serviços.'
+        'O titular pode solicitar confirmação da existência de tratamento de seus dados.',
+        'É garantido o acesso, correção, atualização e portabilidade dos dados pessoais.',
+        'O titular pode solicitar a exclusão de dados tratados de forma inadequada ou desnecessária.',
+        'As solicitações serão atendidas no prazo legal de até 15 dias, conforme a LGPD.'
       ]
     },
     {
       id: 'cookies',
-      title: '9. Cookies e Tecnologias Similares',
+      title: '12. Cookies e Tecnologias Similares',
       content: [
-        'Utilizamos cookies essenciais para funcionamento da plataforma.',
-        'Cookies de performance para análise de uso e melhorias.',
-        'Você pode configurar seu navegador para bloquear cookies não essenciais.',
-        'Alguns recursos podem não funcionar adequadamente sem cookies.'
+        'Utilizamos cookies essenciais para o funcionamento adequado da plataforma.',
+        'Cookies não essenciais somente serão utilizados mediante consentimento explícito do usuário.',
+        'O usuário poderá gerenciar ou revogar seu consentimento a qualquer momento.',
+        'A desativação de cookies pode impactar o funcionamento de determinadas funcionalidades.'
       ]
     },
     {
       id: 'menores',
-      title: '10. Proteção de Menores',
+      title: '13. Proteção de Menores',
       content: [
-        'Nossos serviços são destinados a pessoas maiores de 18 anos.',
-        'Não coletamos intencionalmente dados de menores de idade.',
-        'Se tomarmos conhecimento de coleta inadvertida, os dados serão excluídos.',
-        'Responsáveis legais podem exercer direitos em nome de menores.'
+        'A plataforma é destinada exclusivamente a pessoas maiores de 18 anos.',
+        'Não realizamos, de forma intencional, o tratamento de dados de menores de idade.',
+        'Caso seja identificada a coleta inadvertida, os dados serão prontamente excluídos.'
       ]
     },
     {
       id: 'atualizacoes',
-      title: '11. Atualizações da Política',
+      title: '14. Atualizações da Política',
       content: [
-        'Esta política pode ser atualizada periodicamente.',
-        'Usuários serão notificados sobre mudanças significativas.',
-        'Continuação do uso implica aceitação das alterações.',
-        'Versão anterior será mantida disponível para consulta.'
+        'Esta Política de Privacidade poderá ser atualizada a qualquer tempo.',
+        'Alterações relevantes serão comunicadas aos usuários por meio da plataforma.',
+        'O uso contínuo dos serviços após a atualização implica concordância com os novos termos.'
       ]
-    }
-  ]
-
-  const principles = [
-    {
-      icon: <Shield className="w-8 h-8 text-blue-600" />,
-      title: 'Transparência',
-      description: 'Informações claras sobre como tratamos seus dados'
-    },
-    {
-      icon: <Lock className="w-8 h-8 text-green-600" />,
-      title: 'Segurança',
-      description: 'Proteção robusta contra acessos não autorizados'
-    },
-    {
-      icon: <Eye className="w-8 h-8 text-purple-600" />,
-      title: 'Controle',
-      description: 'Você tem controle total sobre seus dados pessoais'
-    },
-    {
-      icon: <UserCheck className="w-8 h-8 text-orange-600" />,
-      title: 'Consentimento',
-      description: 'Tratamento baseado em consentimento livre e informado'
     }
   ]
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-purple-50 py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Shield className="w-10 h-10 text-blue-600" />
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-6">
-              Política de Privacidade
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Seu compromisso com a proteção e privacidade dos seus dados na plataforma Rebanho Digital
-            </p>
-            <div className="mt-6 text-sm text-gray-500">
-              Última atualização: 15 de janeiro de 2026 | Em conformidade com a LGPD
-            </div>
-          </motion.div>
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <Shield className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Política de Privacidade
+          </h1>
+          <p className="text-gray-600">
+            Última atualização: 15 de janeiro de 2026
+          </p>
         </div>
       </section>
 
-      {/* LGPD Compliance Notice */}
-      <section className="py-8 bg-blue-50 border-b border-blue-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="flex items-start space-x-3"
-          >
-            <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
-            <div>
-              <h3 className="font-semibold text-blue-800 mb-2">
-                Conformidade com a LGPD
-              </h3>
-              <p className="text-blue-700 text-sm">
-                Esta política está em total conformidade com a Lei Geral de Proteção de Dados (LGPD) 
-                e garante seus direitos como titular de dados pessoais.
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Principles */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Nossos Princípios de Privacidade
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Fundamentamos nosso tratamento de dados em princípios sólidos de proteção e transparência
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {principles.map((principle, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="text-center"
-              >
-                <div className="bg-gray-50 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  {principle.icon}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  {principle.title}
-                </h3>
-                <p className="text-gray-600">
-                  {principle.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Privacy Content */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-12">
-            {sections.map((section, index) => (
-              <motion.div
-                key={section.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.05 }}
-                className="bg-white rounded-2xl p-8 shadow-sm"
-              >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  {section.title}
-                </h2>
-                <div className="space-y-4">
-                  {section.content.map((paragraph, idx) => (
-                    <p key={idx} className="text-gray-700 leading-relaxed">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Data Protection Officer */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8"
-          >
-            <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6">
-                <Database className="w-8 h-8 text-blue-600" />
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Encarregado de Proteção de Dados (DPO)
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-4 space-y-12">
+          {sections.map(section => (
+            <div key={section.id} className="bg-white p-8 rounded-2xl shadow-sm">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                {section.title}
               </h2>
-              <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-                Nosso DPO está disponível para esclarecer dúvidas sobre o tratamento de dados 
-                e auxiliar no exercício de seus direitos.
-              </p>
-              
-              <div className="grid md:grid-cols-3 gap-6 text-left">
-                <div className="bg-white rounded-xl p-6">
-                  <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
-                  <p className="text-gray-600">dpo@agropecmanager.com.br</p>
-                </div>
-                <div className="bg-white rounded-xl p-6">
-                  <h3 className="font-semibold text-gray-900 mb-2">Telefone</h3>
-                  <p className="text-gray-600">+55 (11) 3000-0000</p>
-                </div>
-                <div className="bg-white rounded-xl p-6">
-                  <h3 className="font-semibold text-gray-900 mb-2">Horário</h3>
-                  <p className="text-gray-600">Seg a Sex, 9h às 17h</p>
-                </div>
+              <div className="space-y-3">
+                {section.content.map((text, i) => (
+                  <p key={i} className="text-gray-700 leading-relaxed">
+                    {text}
+                  </p>
+                ))}
               </div>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Rights Exercise */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Exercite Seus Direitos
-            </h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Você tem direitos garantidos pela LGPD. Entre em contato conosco para exercê-los
-            </p>
-            
-            <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-              <button className="bg-blue-600 text-white px-6 py-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors">
-                Solicitar Dados
-              </button>
-              <button className="border-2 border-blue-600 text-blue-600 px-6 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-colors">
-                Exercer Direitos
-              </button>
-            </div>
-            
-            <p className="text-sm text-gray-500 mt-6">
-              Responderemos sua solicitação em até 15 dias úteis
-            </p>
-          </motion.div>
+          ))}
         </div>
       </section>
     </div>

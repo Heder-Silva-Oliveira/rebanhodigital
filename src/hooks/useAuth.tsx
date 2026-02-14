@@ -204,7 +204,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signUp = useCallback(async (payload: SignUpPayload): Promise<any> => {
     setLoading(true);
     try {
-      const res = await fetch(`${EXPRESS_SERVER_URL}/api/users`, {
+      const res = await fetch(`${EXPRESS_SERVER_URL}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

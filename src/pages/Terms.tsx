@@ -1,7 +1,6 @@
-
 import React from 'react'
 import { motion } from 'framer-motion'
-import {Shield, FileText, Scale, AlertTriangle} from 'lucide-react'
+import { Shield, FileText, Scale, AlertTriangle } from 'lucide-react'
 
 export const Terms: React.FC = () => {
   const sections = [
@@ -9,264 +8,142 @@ export const Terms: React.FC = () => {
       id: 'aceite',
       title: '1. Aceite dos Termos',
       content: [
-        'Ao acessar e usar a plataforma Rebanho Digital, você concorda em cumprir e estar sujeito aos seguintes termos e condições de uso.',
-        'Se você não concordar com qualquer parte destes termos, não deverá usar nossos serviços.',
-        'Reservamo-nos o direito de alterar estes termos a qualquer momento, sendo sua responsabilidade verificar periodicamente as atualizações.'
+        'Ao acessar ou utilizar a plataforma Rebanho Digital, o usuário declara ter lido, compreendido e aceitado integralmente estes Termos de Uso.',
+        'Caso o usuário não concorde com qualquer disposição destes termos, não deverá utilizar a plataforma.',
+        'A Rebanho Digital poderá atualizar estes termos a qualquer momento, sendo responsabilidade do usuário verificá-los periodicamente.'
       ]
     },
     {
       id: 'servicos',
       title: '2. Descrição dos Serviços',
       content: [
-        'A Rebanho Digital oferece uma plataforma digital para gestão de propriedades pecuárias, incluindo controle de rebanho, gestão financeira, monitoramento de pastagens e geração de relatórios.',
-        'Nossos serviços são fornecidos "como estão" e podem ser modificados, suspensos ou descontinuados a qualquer momento.',
-        'Não garantimos que os serviços estarão sempre disponíveis, livres de erros ou que atenderão às suas necessidades específicas.'
+        'A Rebanho Digital disponibiliza uma plataforma digital destinada à gestão de propriedades pecuárias, incluindo controle de rebanho, registros operacionais, gestão financeira básica e geração de relatórios.',
+        'A plataforma atua como ferramenta de apoio à organização e visualização de informações inseridas pelo próprio usuário.',
+        'Os serviços poderão ser alterados, suspensos ou descontinuados a qualquer momento, sem garantia de disponibilidade contínua.'
+      ]
+    },
+    {
+      id: 'disclaimer',
+      title: '3. Disclaimer Técnico',
+      content: [
+        'A Rebanho Digital não presta serviços de consultoria técnica, veterinária, zootécnica, agronômica, contábil, financeira ou jurídica.',
+        'As informações, relatórios e análises gerados pela plataforma possuem caráter meramente informativo e auxiliar.',
+        'Toda e qualquer decisão tomada com base nos dados da plataforma é de responsabilidade exclusiva do usuário.'
       ]
     },
     {
       id: 'conta',
-      title: '3. Conta de Usuário',
+      title: '4. Conta de Usuário',
       content: [
-        'Para usar nossos serviços, você deve criar uma conta fornecendo informações precisas e atualizadas.',
-        'Você é responsável por manter a confidencialidade de suas credenciais de acesso.',
-        'Você deve notificar-nos imediatamente sobre qualquer uso não autorizado de sua conta.',
-        'Reservamo-nos o direito de suspender ou encerrar contas que violem estes termos.'
+        'Para utilizar os serviços, o usuário deverá criar uma conta fornecendo informações verdadeiras, completas e atualizadas.',
+        'O usuário é o único responsável pela guarda e confidencialidade de suas credenciais de acesso.',
+        'Qualquer atividade realizada na conta será considerada de responsabilidade do titular.',
+        'A Rebanho Digital poderá suspender ou encerrar contas que violem estes termos ou a legislação vigente.'
       ]
     },
     {
-      id: 'uso-aceitavel',
-      title: '4. Uso Aceitável',
+      id: 'uso',
+      title: '5. Uso Aceitável da Plataforma',
       content: [
-        'Você concorda em usar nossos serviços apenas para fins legais e de acordo com estes termos.',
-        'É proibido usar a plataforma para atividades ilegais, fraudulentas ou que violem direitos de terceiros.',
-        'Não é permitido tentar acessar sistemas ou dados não autorizados.',
-        'O compartilhamento de credenciais de acesso é estritamente proibido.'
+        'O usuário compromete-se a utilizar a plataforma exclusivamente para fins lícitos.',
+        'É vedada a utilização da plataforma para atividades ilegais, fraudulentas ou que violem direitos de terceiros.',
+        'É proibido tentar acessar áreas restritas, sistemas ou dados sem autorização.',
+        'O compartilhamento de contas ou credenciais de acesso é expressamente proibido.'
       ]
     },
     {
       id: 'dados',
-      title: '5. Proteção de Dados',
+      title: '6. Dados e Privacidade',
       content: [
-        'Coletamos e processamos seus dados pessoais de acordo com nossa Política de Privacidade.',
-        'Você mantém a propriedade de todos os dados inseridos na plataforma.',
-        'Implementamos medidas de segurança adequadas para proteger seus dados.',
-        'Você pode solicitar a exportação ou exclusão de seus dados a qualquer momento.'
+        'O tratamento de dados pessoais é realizado conforme descrito na Política de Privacidade da Rebanho Digital.',
+        'O usuário permanece como titular e proprietário dos dados inseridos na plataforma.',
+        'A Rebanho Digital adota medidas técnicas e organizacionais para proteção dos dados.',
+        'O usuário poderá solicitar acesso, exportação ou exclusão de seus dados, observadas as obrigações legais.'
       ]
     },
     {
       id: 'pagamento',
-      title: '6. Pagamento e Assinatura',
+      title: '7. Planos, Pagamento e Assinatura',
       content: [
-        'O acesso aos serviços está sujeito ao pagamento das taxas aplicáveis conforme o plano escolhido.',
-        'Os pagamentos são processados através de provedores terceirizados seguros.',
-        'As taxas são cobradas antecipadamente e não são reembolsáveis, exceto quando exigido por lei.',
-        'Você pode cancelar sua assinatura a qualquer momento através da plataforma.'
+        'O acesso a determinadas funcionalidades poderá estar condicionado à contratação de planos pagos.',
+        'Os valores, condições e recursos de cada plano estarão descritos na plataforma.',
+        'Os pagamentos são processados por intermediadores terceiros, não sendo armazenados dados bancários pela Rebanho Digital.',
+        'Salvo disposição legal em contrário, os valores pagos não são reembolsáveis.',
+        'O usuário poderá cancelar sua assinatura a qualquer momento, com efeitos ao final do período contratado.'
       ]
     },
     {
       id: 'propriedade',
-      title: '7. Propriedade Intelectual',
+      title: '8. Propriedade Intelectual',
       content: [
-        'Todos os direitos de propriedade intelectual da plataforma pertencem à Rebanho Digital.',
-        'Você recebe uma licença limitada e não exclusiva para usar nossos serviços.',
-        'É proibido copiar, modificar, distribuir ou criar obras derivadas de nossos conteúdos.',
-        'Respeitamos os direitos de propriedade intelectual de terceiros e esperamos que você faça o mesmo.'
+        'Todos os direitos de propriedade intelectual sobre a plataforma pertencem exclusivamente à Rebanho Digital.',
+        'É concedida ao usuário uma licença limitada, não exclusiva e intransferível para uso da plataforma.',
+        'É vedada a cópia, modificação, distribuição, engenharia reversa ou criação de obras derivadas.',
+        'O uso indevido poderá resultar em responsabilização civil e criminal.'
       ]
     },
     {
-      id: 'limitacao',
-      title: '8. Limitação de Responsabilidade',
+      id: 'responsabilidade',
+      title: '9. Limitação de Responsabilidade',
       content: [
-        'Nossa responsabilidade é limitada ao valor pago pelos serviços nos últimos 12 meses.',
-        'Não somos responsáveis por danos indiretos, incidentais ou consequenciais.',
-        'Você usa nossos serviços por sua própria conta e risco.',
-        'Recomendamos manter backups independentes de seus dados importantes.'
+        'A plataforma é fornecida no estado em que se encontra, sem garantias de resultado econômico, produtivo ou financeiro.',
+        'A Rebanho Digital não se responsabiliza por perdas, danos indiretos, lucros cessantes ou prejuízos decorrentes do uso da plataforma.',
+        'A responsabilidade total da Rebanho Digital, quando aplicável, limita-se ao valor efetivamente pago pelo usuário nos últimos 12 meses.',
+        'Nada nestes termos exclui ou limita responsabilidades nos casos de dolo, fraude ou quando a legislação brasileira assim determinar.'
       ]
     },
     {
       id: 'rescisao',
-      title: '9. Rescisão',
+      title: '10. Rescisão',
       content: [
-        'Você pode encerrar sua conta a qualquer momento através das configurações da plataforma.',
-        'Podemos suspender ou encerrar sua conta em caso de violação destes termos.',
-        'Após o encerramento, você perderá o acesso aos serviços e dados na plataforma.',
-        'As disposições que por sua natureza devem sobreviver continuarão válidas após a rescisão.'
+        'O usuário poderá encerrar sua conta a qualquer momento por meio das configurações da plataforma.',
+        'A Rebanho Digital poderá suspender ou encerrar o acesso em caso de violação destes termos.',
+        'Após o encerramento, o usuário perderá o acesso à plataforma.',
+        'O usuário poderá solicitar a exportação de seus dados pelo prazo legal aplicável, conforme a LGPD.'
       ]
     },
     {
-      id: 'geral',
-      title: '10. Disposições Gerais',
+      id: 'foro',
+      title: '11. Disposições Gerais e Foro',
       content: [
-        'Estes termos são regidos pelas leis brasileiras.',
-        'Qualquer disputa será resolvida nos tribunais de Londrina, PR.',
-        'Se alguma disposição for considerada inválida, as demais permanecerão em vigor.',
-        'Estes termos constituem o acordo completo entre as partes.'
+        'Estes Termos de Uso são regidos pelas leis da República Federativa do Brasil.',
+        'Quando caracterizada relação de consumo, será competente o foro do domicílio do usuário.',
+        'Nos demais casos, fica eleito o foro da comarca de Londrina, Paraná.',
+        'A eventual invalidade de alguma cláusula não afetará as demais disposições.'
       ]
     }
   ]
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-gray-100 py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FileText className="w-10 h-10 text-blue-600" />
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-6">
-              Termos de Uso
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Leia atentamente nossos termos e condições de uso da plataforma Rebanho Digital
-            </p>
-            <div className="mt-6 text-sm text-gray-500">
-              Última atualização: 15 de janeiro de 2024
-            </div>
-          </motion.div>
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <FileText className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Termos de Uso
+          </h1>
+          <p className="text-gray-600">
+            Última atualização: 15 de janeiro de 2026
+          </p>
         </div>
       </section>
 
-      {/* Important Notice */}
-      <section className="py-8 bg-yellow-50 border-b border-yellow-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="flex items-start space-x-3"
-          >
-            <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
-            <div>
-              <h3 className="font-semibold text-yellow-800 mb-2">
-                Aviso Importante
-              </h3>
-              <p className="text-yellow-700 text-sm">
-                Ao usar nossa plataforma, você automaticamente concorda com estes termos. 
-                É importante ler e compreender todas as cláusulas antes de prosseguir.
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Terms Content */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-12">
-            {sections.map((section, index) => (
-              <motion.div
-                key={section.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-gray-50 rounded-2xl p-8"
-              >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  {section.title}
-                </h2>
-                <div className="space-y-4">
-                  {section.content.map((paragraph, idx) => (
-                    <p key={idx} className="text-gray-700 leading-relaxed">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Legal Info */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center"
-            >
-              <div className="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-blue-600" />
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-4 space-y-12">
+          {sections.map(section => (
+            <div key={section.id} className="bg-white p-8 rounded-2xl shadow-sm">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                {section.title}
+              </h2>
+              <div className="space-y-3">
+                {section.content.map((text, i) => (
+                  <p key={i} className="text-gray-700 leading-relaxed">
+                    {text}
+                  </p>
+                ))}
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Proteção Legal
-              </h3>
-              <p className="text-gray-600">
-                Nossos termos estão em conformidade com a legislação brasileira
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-center"
-            >
-              <div className="bg-green-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Scale className="w-8 h-8 text-green-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Transparência
-              </h3>
-              <p className="text-gray-600">
-                Linguagem clara e objetiva para seu entendimento
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-center"
-            >
-              <div className="bg-purple-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <FileText className="w-8 h-8 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Atualizações
-              </h3>
-              <p className="text-gray-600">
-                Termos revisados periodicamente para sua proteção
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Dúvidas sobre os Termos?
-            </h2>
-            <p className="text-xl text-gray-600 mb-8">
-              Nossa equipe está disponível para esclarecer qualquer questão
-            </p>
-            <div className="space-y-4 text-gray-600">
-              <p>
-                <strong>Email:</strong> legal@agropecmanager.com.br
-              </p>
-              <p>
-                <strong>Telefone:</strong> +55 (11) 3000-0000
-              </p>
-              <p>
-                <strong>Endereço:</strong> Rua das Tecnologias, 123 - São Paulo, SP
-              </p>
             </div>
-          </motion.div>
+          ))}
         </div>
       </section>
     </div>

@@ -14,7 +14,9 @@ import {
   Heart, 
   ChevronLeft, 
   ChevronRight,
-  Lock // Ícone para features "Pro"
+  Lock, // Ícone para features "Pro"
+  Users,
+  CreditCard
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -22,19 +24,28 @@ interface SidebarProps {
   toggleSidebar: () => void
 }
 
+interface SidebarItem {
+  name: string;
+  href: string;
+  icon: any;
+  feature: string | null;
+  adminOnly?: boolean;
+}
+
 // 1. Definimos a "lista mestre" de todos os itens possíveis
-const ALL_SIDEBAR_ITEMS = [
+const ALL_SIDEBAR_ITEMS: SidebarItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, feature: null },
   { name: 'Animais', href: '/animals', icon: Beef, feature: null },
   { name: 'Financeiro', href: '/financial', icon: DollarSign, feature: null },
   { name: 'Pesagem', href: '/weighing' , icon: Scale, feature: null},
   { name: 'Pastagens', href: '/pastures', icon: MapPin, feature: null },
-  { name: 'Planejamento', href: '/planning', icon: Calendar, feature: null },
+  { name: 'Planejamento', href: '/planning', icon: Calendar, feature: 'planning' },
   { name: 'Notificações', href: '/notifications', icon: Bell, feature: null },
   { name: 'Estimativa', href: '/estimativa', icon: Calculator, feature: null},
   { name: 'Formulação', href: '/formulacao', icon: Scale, feature: null },
-  // 2. Marcamos este item como uma "feature"
-  { name: 'Saúde da Empresa', href: '/company-health', icon: Heart, feature: 'companyHealth' }
+  { name: 'Saúde da Empresa', href: '/company-health', icon: Heart, feature: 'companyHealth' },
+  { name: 'Usuários', href: '/usuarios', icon: Users, feature: 'multiUser', adminOnly: true },
+  { name: 'Planos', href: '/planos', icon: CreditCard, feature: null },
 ]
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
@@ -49,6 +60,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
 
   // Filtra a lista de itens com base nas features do plano
   const sidebarItems = ALL_SIDEBAR_ITEMS.filter(item => {
+    // Se for adminOnly, verifica se o usuário é admin
+    if (item.adminOnly && user?.role !== 'admin') {
+      return false;
+    }
+    
     // Se não for uma feature especial, mostra (feature: null)
     if (!item.feature) {
       return true;

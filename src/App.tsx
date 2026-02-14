@@ -35,6 +35,9 @@ import Formula from './pages/formula'
 import SignUpPage from './pages/SignUpPage'
 import ProfilePage from './pages/Profile'
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import Users from './pages/Users';
+import Plans from './pages/Plans';
+import TestAuth from './pages/TestAuth';
 
 /* =====================================
    🔐 ROTA PROTEGIDA
@@ -117,6 +120,9 @@ const AppContent: React.FC = () => {
           <Route path="/estimativa" element={<ProtectedRoute><Estimativa /></ProtectedRoute>} />
           <Route path="/formulacao" element={<ProtectedRoute><Formula /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/usuarios" element={<ProtectedRoute><Users /></ProtectedRoute>} />
+          <Route path="/planos" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
+          <Route path="/test-auth" element={<ProtectedRoute><TestAuth /></ProtectedRoute>} />
           
 
           {/* fallback autenticado */}

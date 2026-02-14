@@ -20,4 +20,4 @@ const PastureSchema = new mongoose.Schema({
   updatedAt: Date
 });
 
-export const Pasture = mongoose.model('Pasture', PastureSchema);
+export const Pasture = mongoose.models.Pasture || mongoose.model('Pasture', PastureSchema);

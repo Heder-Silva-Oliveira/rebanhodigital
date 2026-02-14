@@ -13,4 +13,4 @@ const WeighingRecordSchema = new mongoose.Schema({
   created_at: Date
 });
 
-export const WeighingRecord = mongoose.model('WeighingRecord', WeighingRecordSchema);
+export const WeighingRecord = mongoose.models.WeighingRecord || mongoose.model('WeighingRecord', WeighingRecordSchema);
